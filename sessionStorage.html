@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Playwright Practice: sessionStorage Manager</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Inter', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f0f4fa 0%, #e6ecf2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 2rem 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* main card container */
+        .card {
+            max-width: 1100px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(2px);
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        /* header zone */
+        .header {
+            background: #1a2c3e;
+            color: white;
+            padding: 1.5rem 2rem;
+            border-bottom: 4px solid #ffb347;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.8rem;
+            letter-spacing: -0.3px;
+        }
+
+        .header p {
+            margin: 0.5rem 0 0;
+            opacity: 0.85;
+            font-size: 0.95rem;
+        }
+
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .badge {
+            background: #2c4c6c;
+            padding: 0.25rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-family: monospace;
+            font-weight: 500;
+        }
+
+        /* main two column layout */
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.8rem;
+            padding: 2rem;
+        }
+
+        .panel {
+            flex: 1;
+            min-width: 260px;
+            background: #ffffffdd;
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            padding: 1.25rem 1.5rem;
+            transition: box-shadow 0.2s;
+        }
+
+        .panel:hover {
+            box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
+        }
+
+        .panel h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+            border-left: 5px solid #ffb347;
+            padding-left: 0.8rem;
+            color: #1f2f3e;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.4rem;
+            font-size: 0.85rem;
+            color: #2c3e4e;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 1rem;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            background: #fefefe;
+            font-family: monospace;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #ffb347;
+            box-shadow: 0 0 0 3px rgba(255, 180, 71, 0.2);
+        }
+
+        button {
+            background: #1f3a4b;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 0.6rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        button:hover {
+            background: #ff8c2c;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .btn-danger {
+            background: #9e2d2f;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-clear {
+            background: #4a5b66;
+        }
+
+        .btn-clear:hover {
+            background: #2c3e50;
+        }
+
+        .storage-list {
+            background: #f8fafc;
+            border-radius: 1.2rem;
+            padding: 0.2rem 0;
+            max-height: 280px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+        }
+
+        .storage-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2edf2;
+            padding: 0.7rem 0.9rem;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.8rem;
+            transition: background 0.1s;
+        }
+
+        .storage-item:hover {
+            background: #ffffff;
+        }
+
+        .item-key {
+            font-weight: 700;
+            color: #1e4663;
+            word-break: break-word;
+            max-width: 35%;
+        }
+
+        .item-value {
+            color: #2d6a4f;
+            word-break: break-word;
+            flex: 1;
+            margin: 0 0.8rem;
+            font-family: monospace;
+            background: #eef2f6;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+        }
+
+        .item-actions button {
+            background: none;
+            color: #6c7a89;
+            box-shadow: none;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.7rem;
+            margin: 0 0 0 0.3rem;
+        }
+
+        .item-actions button:hover {
+            background: #ffb34720;
+            color: #c2410c;
+        }
+
+        .empty-msg {
+            padding: 1.5rem;
+            text-align: center;
+            color: #6c86a3;
+            font-style: italic;
+        }
+
+        .info-status {
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            background: #eff3f8;
+            padding: 0.5rem 0.8rem;
+            border-radius: 1rem;
+            color: #2c5282;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        hr {
+            margin: 1rem 0;
+            border-color: #e9eef3;
+        }
+
+        .flex-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 720px) {
+            body {
+                padding: 1rem;
+            }
+
+            .dashboard {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .panel {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <div class="header">
+            <h1>📦 sessionStorage Playground</h1>
+            <p>Practice & test sessionStorage using Playwright • persistent only during tab session</p>
+            <div class="badge-row">
+                <span class="badge">🔑 setItem / getItem</span>
+                <span class="badge">🗑️ removeItem / clear</span>
+                <span class="badge">🔄 Live sync</span>
+                <span class="badge">✅ Playwright ready (data-testid)</span>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <!-- LEFT PANEL: Insert / Update -->
+            <div class="panel">
+                <h2>✏️ Add / Update</h2>
+                <div class="form-group">
+                    <label for="keyInput">🔹 Key (identifier)</label>
+                    <input type="text" id="keyInput" placeholder="e.g., username, theme, sessionToken"
+                        data-testid="storage-key-input" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="valueInput">🔸 Value (string or JSON)</label>
+                    <textarea id="valueInput" rows="2" placeholder="Any text or JSON string..."
+                        data-testid="storage-value-input"></textarea>
+                </div>
+                <div class="flex-buttons">
+                    <button id="setBtn" data-testid="set-storage-btn">💾 Set / Update Item</button>
+                    <button id="removeBtn" data-testid="remove-storage-btn">🗑️ Remove current key</button>
+                </div>
+                <div class="info-status" id="operationStatus" data-testid="operation-status">
+                    ⚡ Ready — operations will update sessionStorage
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: Display + controls -->
+            <div class="panel">
+                <h2>📋 sessionStorage Contents</h2>
+                <div id="storageListContainer" class="storage-list" data-testid="storage-list">
+                    <!-- dynamic items injected here -->
+                    <div class="empty-msg">✨ No items yet. Add some data!</div>
+                </div>
+                <div class="flex-buttons" style="margin-top: 1rem;">
+                    <button id="refreshBtn" data-testid="refresh-storage-btn">🔄 Refresh view</button>
+                    <button id="clearAllBtn" class="btn-clear" data-testid="clear-all-btn">🧹 Clear All
+                        sessionStorage</button>
+                </div>
+                <div class="info-status" id="storageSizeInfo" data-testid="storage-size">
+                    📌 Items count: 0
+                </div>
+            </div>
+        </div>
+
+        <div style="padding: 0 2rem 1.8rem 2rem; border-top: 1px solid #eef2f8; font-size: 0.7rem; color: #4a627a;">
+            ⚠️ sessionStorage persists only while the tab is open. Close & reopen → data is lost (perfect for testing).
+            <span style="float: right;">🖱️ Use data-testid attributes for Playwright selectors</span>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // ------------------------- DOM elements -------------------------
+            const keyInput = document.getElementById('keyInput');
+            const valueInput = document.getElementById('valueInput');
+            const setBtn = document.getElementById('setBtn');
+            const removeBtn = document.getElementById('removeBtn');
+            const refreshBtn = document.getElementById('refreshBtn');
+            const clearAllBtn = document.getElementById('clearAllBtn');
+            const storageListContainer = document.getElementById('storageListContainer');
+            const operationStatusSpan = document.getElementById('operationStatus');
+            const storageSizeSpan = document.getElementById('storageSizeInfo');
+
+            // Helper: show status message (auto-clears after 2.5 sec)
+            let statusTimeout = null;
+            function setStatusMessage(message, isError = false) {
+                if (statusTimeout) clearTimeout(statusTimeout);
+                operationStatusSpan.innerHTML = isError ? `⚠️ ${message}` : `✅ ${message}`;
+                operationStatusSpan.style.color = isError ? '#b91c1c' : '#166534';
+                statusTimeout = setTimeout(() => {
+                    if (operationStatusSpan) {
+                        operationStatusSpan.innerHTML = `⚡ Ready — operations will update sessionStorage`;
+                        operationStatusSpan.style.color = '#2c5282';
+                    }
+                }, 2500);
+            }
+
+            // Helper: get all sessionStorage as key-value array
+            function getAllSessionStorage() {
+                const items = [];
+                for (let i = 0; i < sessionStorage.length; i++) {
+                    const key = sessionStorage.key(i);
+                    if (key !== null) {
+                        const value = sessionStorage.getItem(key);
+                        items.push({ key, value: value !== null ? value : '' });
+                    }
+                }
+                // sort alphabetically for consistent display
+                items.sort((a, b) => a.key.localeCompare(b.key));
+                return items;
+            }
+
+            // Render the list of sessionStorage items with inline delete buttons
+            function renderStorageList() {
+                const items = getAllSessionStorage();
+                const count = items.length;
+                storageSizeSpan.innerHTML = `📌 Items count: ${count} | Total size approx: ${estimateTotalSize()} chars`;
+
+                if (items.length === 0) {
+                    storageListContainer.innerHTML = `<div class="empty-msg" data-testid="storage-empty-message">📭 sessionStorage is empty — add some key-value pairs</div>`;
+                    return;
+                }
+
+                // Build HTML list with individual delete (removeItem) for each key
+                let html = '';
+                for (const item of items) {
+                    // Escape for XSS safety (basic textContent via innerHTML but we escape manually)
+                    const safeKey = escapeHtml(item.key);
+                    const safeValue = escapeHtml(item.value.length > 80 ? item.value.substring(0, 80) + '…' : item.value);
+                    const fullValueRaw = item.value;
+                    html += `
+                    <div class="storage-item" data-testid="storage-row-${safeKey}">
+                        <span class="item-key" title="key: ${safeKey}">${safeKey}</span>
+                        <span class="item-value" title="value: ${escapeHtml(fullValueRaw)}">${safeValue}</span>
+                        <span class="item-actions">
+                            <button class="delete-single-item" data-key="${escapeHtmlAttr(item.key)}" data-testid="delete-item-${safeKey}">✖️</button>
+                        </span>
+                    </div>
+                `;
+                }
+                storageListContainer.innerHTML = html;
+
+                // attach event listeners to each delete button
+                const deleteButtons = document.querySelectorAll('.delete-single-item');
+                deleteButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const keyToDelete = btn.getAttribute('data-key');
+                        if (keyToDelete) {
+                            sessionStorage.removeItem(keyToDelete);
+                            setStatusMessage(`Removed key "${keyToDelete}"`);
+                            renderStorageList();    // re-render after removal
+                            // also clear from input fields if the removed key matches current keyInput value
+                            if (keyInput.value === keyToDelete) {
+                                // optional: but don't auto clear value, just keep input as is; but user experience fine
+                            }
+                        }
+                    });
+                });
+            }
+
+            // simple helpers to escape HTML and attribute
+            function escapeHtml(str) {
+                if (!str) return '';
+                return str.replace(/[&<>]/g, function (m) {
+                    if (m === '&') return '&amp;';
+                    if (m === '<') return '&lt;';
+                    if (m === '>') return '&gt;';
+                    return m;
+                }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function (c) {
+                    return c;
+                });
+            }
+            function escapeHtmlAttr(str) {
+                if (!str) return '';
+                return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
+
+            // estimate storage size in characters (rough)
+            function estimateTotalSize() {
+                let total = 0;
+                for (let i = 0; i < sessionStorage.length; i++) {
+                    const key = sessionStorage.key(i);
+                    const val = sessionStorage.getItem(key);
+                    total += (key?.length || 0) + (val?.length || 0);
+                }
+                return total;
+            }
+
+            // Set or update item based on current key/value inputs
+            function setStorageItem() {
+                let key = keyInput.value.trim();
+                let value = valueInput.value;
+
+                if (key === "") {
+                    setStatusMessage("Key cannot be empty! Please enter a valid key.", true);
+                    return;
+                }
+
+                // optional: trim but keep value as is (including spaces intentional)
+                try {
+                    sessionStorage.setItem(key, value);
+                    setStatusMessage(`Stored "${key}" ➜ ${value.length > 40 ? value.substring(0, 40) + '…' : value}`);
+                    renderStorageList();      // update live view
+                    // optionally highlight that operation succeeded
+                    // do not clear inputs by default for easy multiple updates, but we can keep them.
+                    // but for Playwright practice, better keep them so next update can modify.
+                    // however we can auto-focus key or something.
+                } catch (e) {
+                    setStatusMessage(`Error writing to sessionStorage: ${e.message}`, true);
+                }
+            }
+
+            // Remove item using current keyInput value
+            function removeCurrentKeyItem() {
+                const key = keyInput.value.trim();
+                if (key === "") {
+                    setStatusMessage("Please enter a key to remove.", true);
+                    return;
+                }
+                if (sessionStorage.getItem(key) === null) {
+                    setStatusMessage(`Key "${key}" does not exist in sessionStorage.`, true);
+                    return;
+                }
+                sessionStorage.removeItem(key);
+                setStatusMessage(`Removed key "${key}"`);
+                renderStorageList();
+                // optionally clear the key input field for convenience? Not mandatory, but good UX
+                // but we keep it to allow further deletion of same key? However it's removed so show emptiness.
+                // We don't automatically clear value input but we could indicate success. We'll leave value as is.
+            }
+
+            // Clear all sessionStorage (destructive)
+            function clearAllStorage() {
+                if (sessionStorage.length === 0) {
+                    setStatusMessage("sessionStorage is already empty.", false);
+                    return;
+                }
+                sessionStorage.clear();
+                setStatusMessage("Cleared ALL sessionStorage items.");
+                renderStorageList();
+                // no need to reset input fields, but we update status.
+            }
+
+            // refresh view manually (in case of external changes)
+            function refreshView() {
+                renderStorageList();
+                setStatusMessage("Storage view refreshed.", false);
+            }
+
+            // Optional: listen to storage events (only cross-tab, but sessionStorage same tab, but we also trigger on changes)
+            // We'll also listen to any direct sessionStorage modifications from devtools, but our button actions already re-render
+            // Also when user manually types in key/value we can provide real time? Not needed.
+            // But we can add an event listener for storage event (for same tab, sessionStorage doesn't fire storage event same origin? Actually storage event only fires for localStorage and cross-tab, sessionStorage per tab doesn't fire.
+            // So we rely on our buttons to refresh. Also we add a manual refresh button.
+
+            // initial rendering at load
+            function init() {
+                renderStorageList();
+
+                // set initial example data to showcase usage (only if empty)
+                if (sessionStorage.length === 0) {
+                    // add some demo items for better practice experience
+                    sessionStorage.setItem('playwright_demo', 'sessionStorage testing');
+                    sessionStorage.setItem('theme', 'dark-mode');
+                    sessionStorage.setItem('session_id', 'demo-abc-123');
+                    sessionStorage.setItem('user_preferences', JSON.stringify({ language: 'en', notifications: true }));
+                    renderStorageList();
+                    setStatusMessage("🎯 Demo data added! Perfect for Playwright tests.", false);
+                }
+            }
+
+            // attach event listeners
+            setBtn.addEventListener('click', setStorageItem);
+            removeBtn.addEventListener('click', removeCurrentKeyItem);
+            clearAllBtn.addEventListener('click', clearAllStorage);
+            refreshBtn.addEventListener('click', refreshView);
+
+            // optional: pressing Enter in key/value? Not mandatory but enhance usability
+            keyInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') setStorageItem();
+            });
+            valueInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    setStorageItem();
+                }
+            });
+
+            // Patch for manual updates via devtools console? Only on refresh click we keep consistency.
+            // also expose a utility for playwright window check: window.__getSessionStorage for debugging? optional but safe.
+            window.__getSessionStorageForTest = function () {
+                return getAllSessionStorage();
+            };
+
+            // run init after dom ready
+            init();
+        })();
+    </script>
+</body>
+
+</html>
