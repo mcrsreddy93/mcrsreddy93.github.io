@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Sign in & Welcome</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #f9faff 0%, #eef2ff 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        /* animated background */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0) 70%);
+            border-radius: 50%;
+            top: 10%;
+            left: -5%;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0) 70%);
+            border-radius: 50%;
+            bottom: 5%;
+            right: -8%;
+            z-index: 0;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.02);
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem 2rem 2.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            z-index: 2;
+        }
+
+        @media (max-width: 520px) {
+            .glass-card {
+                padding: 1.6rem 1.4rem 2rem;
+            }
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 1.8rem;
+        }
+
+        .brand-icon {
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            width: 56px;
+            height: 56px;
+            border-radius: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.4);
+        }
+
+        .brand-icon i {
+            font-size: 28px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(120deg, #1e293b, #334155);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+
+        /* Welcome panel styles */
+        .welcome-container {
+            text-align: center;
+        }
+
+        .avatar-circle {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+            box-shadow: 0 12px 24px -8px rgba(59, 130, 246, 0.4);
+        }
+
+        .avatar-circle i {
+            font-size: 44px;
+            color: white;
+        }
+
+        .welcome-message {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-email {
+            color: #5b6e8c;
+            background: #f1f5f9;
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-card {
+            background: #f8fafc;
+            border-radius: 1.2rem;
+            padding: 1.2rem;
+            margin: 1.5rem 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .info-card p {
+            color: #334155;
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .logout-btn {
+            width: 100%;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1.5px solid rgba(239, 68, 68, 0.3);
+            padding: 0.85rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #dc2626;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.25s;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: #fee2e2;
+            border-color: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        /* tab styles reused */
+        .tab-container {
+            display: flex;
+            gap: 0.75rem;
+            background: rgba(241, 245, 249, 0.8);
+            padding: 0.5rem;
+            border-radius: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab-btn {
+            flex: 1;
+            text-align: center;
+            background: transparent;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.7rem 0;
+            border-radius: 2.5rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: 'Inter', sans-serif;
+            color: #475569;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #3b82f6;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-panel {
+            transition: opacity 0.2s ease;
+        }
+
+        .hidden-panel {
+            display: none;
+        }
+
+        .input-group {
+            margin-bottom: 1.3rem;
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.1rem;
+            pointer-events: none;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.9rem 1rem 0.9rem 2.8rem;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 1.2rem;
+            background: #ffffffcc;
+            transition: all 0.2s;
+            outline: none;
+            font-weight: 500;
+        }
+
+        .input-group input:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+            background: white;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin: 1.2rem 0 1.6rem;
+        }
+
+        .checkbox-group label {
+            font-size: 0.85rem;
+            color: #475569;
+            cursor: pointer;
+        }
+
+        .action-btn {
+            width: 100%;
+            background: linear-gradient(95deg, #3b82f6, #8b5cf6);
+            border: none;
+            padding: 0.9rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.25s;
+            box-shadow: 0 5px 12px rgba(59, 130, 246, 0.3);
+            margin-top: 0.25rem;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px -8px rgba(59, 130, 246, 0.5);
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.8rem;
+            margin-top: 1.8rem;
+            color: #5b6e8c;
+        }
+
+        .error-message {
+            font-size: 0.75rem;
+            color: #e11d48;
+            margin-top: 0.3rem;
+            margin-left: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .success-toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: #1e293b;
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 3rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .success-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .demo-badge {
+            background: #f1f5f9;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 1rem;
+            color: #475569;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="glass-card" id="appContainer">
+        <!-- This div will be dynamically populated by JavaScript -->
+    </div>
+
+    <div id="toast-message" class="success-toast">✨ Success</div>
+
+    <script>
+        // --- STATE MANAGEMENT
+        let currentUser = null;   // stores { fullname, email }
+
+        // --- Helper functions
+        const toast = document.getElementById('toast-message');
+        function showToast(message, isError = false) {
+            toast.textContent = message;
+            toast.style.background = isError ? '#be123c' : '#1e293b';
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.style.background = '#1e293b';
+                }, 300);
+            }, 2800);
+        }
+
+        // User storage
+        function getUsers() {
+            const users = localStorage.getItem('ethereal_users');
+            return users ? JSON.parse(users) : [];
+        }
+        function saveUsers(users) {
+            localStorage.setItem('ethereal_users', JSON.stringify(users));
+        }
+        function findUserByEmail(email) {
+            const users = getUsers();
+            return users.find(u => u.email.toLowerCase() === email.toLowerCase());
+        }
+        function registerUser(fullname, email, password) {
+            const users = getUsers();
+            if (findUserByEmail(email)) {
+                return { success: false, message: 'Email already registered. Try signing in.' };
+            }
+            users.push({
+                fullname: fullname.trim(),
+                email: email.toLowerCase(),
+                password: password
+            });
+            saveUsers(users);
+            return { success: true, message: 'Account created successfully! You can now sign in.' };
+        }
+        function authenticateUser(email, password) {
+            const user = findUserByEmail(email);
+            if (user && user.password === password) {
+                return { success: true, name: user.fullname, email: user.email };
+            }
+            return { success: false, message: 'Invalid email or password.' };
+        }
+
+        // Session (store logged in user in sessionStorage to survive page refresh)
+        function saveSession(user) {
+            if (user) {
+                sessionStorage.setItem('ethereal_session', JSON.stringify(user));
+            } else {
+                sessionStorage.removeItem('ethereal_session');
+            }
+        }
+        function getSession() {
+            const raw = sessionStorage.getItem('ethereal_session');
+            return raw ? JSON.parse(raw) : null;
+        }
+
+        // --- RENDER LOGIN/SIGNUP UI (auth container)
+        function renderAuthInterface() {
+            const app = document.getElementById('appContainer');
+            app.innerHTML = `
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fas fa-feather-alt"></i>
+        </div>
+        <h1 id="dynamicBrandTitle">welcome back</h1>
+      </div>
+
+      <div class="tab-container">
+        <button class="tab-btn active" data-tab="login">Sign in</button>
+        <button class="tab-btn" data-tab="signup">Create account</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div id="login-panel" class="form-panel">
+        <form id="login-form" novalidate>
+          <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="login-email" placeholder="Email address" autocomplete="email">
+          </div>
+          <div id="login-email-error" class="error-message"></div>
+
+          <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+          </div>
+          <div id="login-pass-error" class="error-message"></div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="remember-checkbox">
+            <label for="remember-checkbox">Keep me signed in</label>
+          </div>
+
+          <button type="submit" class="action-btn"><i class="fas fa-arrow-right-to-bracket" style="margin-right: 8px;"></i> Sign in</button>
+        </form>
+        <div class="footer-note">
+          <span>✨ Secure access · Protected</span>
+        </div>
+      </div>
+
+      <!-- SIGNUP FORM -->
+      <div id="signup-panel" class="form-panel hidden-panel">
+        <form id="signup-form" novalidate>
+          <div class="input-group">
+            <i class="fas fa-user"></i>
+            <input type="text" id="signup-name" placeholder="Full name" autocomplete="name">
+          </div>
+          <div id="signup-name-error" class="error-message"></div>
+
+          <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="signup-email" placeholder="Email address" autocomplete="email">
+          </div>
+          <div id="signup-email-error" class="error-message"></div>
+
+          <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="signup-password" placeholder="Create password" autocomplete="new-password">
+          </div>
+          <div id="signup-pass-error" class="error-message"></div>
+
+          <div class="input-group">
+            <i class="fas fa-check-circle"></i>
+            <input type="password" id="signup-confirm" placeholder="Confirm password">
+          </div>
+          <div id="signup-confirm-error" class="error-message"></div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="terms-checkbox">
+            <label for="terms-checkbox">I agree to the <strong>Terms</strong> & <strong>Privacy</strong></label>
+          </div>
+          <div id="terms-error" class="error-message"></div>
+
+          <button type="submit" class="action-btn"><i class="fas fa-user-plus" style="margin-right: 8px;"></i> Get started</button>
+        </form>
+        <div class="demo-badge">
+          <i class="fas fa-shield-alt"></i> Demo — signup stores in localStorage
+        </div>
+      </div>
+    `;
+
+            // Attach event listeners after DOM injection
+            attachAuthEvents();
+            // default to login tab visible
+            switchAuthTab('login');
+        }
+
+        function attachAuthEvents() {
+            // Login handler
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    clearAuthErrors('#login-panel');
+                    if (validateLoginForm()) {
+                        const email = document.getElementById('login-email').value.trim();
+                        const password = document.getElementById('login-password').value;
+                        const remember = document.getElementById('remember-checkbox').checked;
+                        const auth = authenticateUser(email, password);
+                        if (auth.success) {
+                            if (remember) {
+                                localStorage.setItem('remembered_email', email);
+                            } else {
+                                localStorage.removeItem('remembered_email');
+                            }
+                            const userData = { fullname: auth.name, email: auth.email };
+                            currentUser = userData;
+                            saveSession(userData);
+                            showToast(`✨ Welcome back, ${auth.name.split(' ')[0]}!`);
+                            renderWelcomeInterface();  // Switch to welcome screen
+                        } else {
+                            showToast(auth.message || 'Login failed', true);
+                        }
+                    }
+                });
+            }
+
+            // Signup handler
+            const signupForm = document.getElementById('signup-form');
+            if (signupForm) {
+                signupForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    clearAuthErrors('#signup-panel');
+                    if (validateSignupForm()) {
+                        const fullname = document.getElementById('signup-name').value.trim();
+                        const email = document.getElementById('signup-email').value.trim();
+                        const password = document.getElementById('signup-password').value;
+                        const registration = registerUser(fullname, email, password);
+                        if (registration.success) {
+                            showToast(registration.message);
+                            // reset signup fields
+                            document.getElementById('signup-name').value = '';
+                            document.getElementById('signup-email').value = '';
+                            document.getElementById('signup-password').value = '';
+                            document.getElementById('signup-confirm').value = '';
+                            document.getElementById('terms-checkbox').checked = false;
+                            clearAuthErrors('#signup-panel');
+                            // switch to login tab after success
+                            setTimeout(() => {
+                                switchAuthTab('login');
+                            }, 1200);
+                        } else {
+                            showToast(registration.message, true);
+                        }
+                    }
+                });
+            }
+
+            // Tab switching
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tab = btn.getAttribute('data-tab');
+                    if (tab === 'login') switchAuthTab('login');
+                    else switchAuthTab('signup');
+                });
+            });
+
+            // Pre-fill remembered email
+            const rememberedEmail = localStorage.getItem('remembered_email');
+            const loginEmailField = document.getElementById('login-email');
+            if (rememberedEmail && loginEmailField) loginEmailField.value = rememberedEmail;
+
+            // Live clear errors on focus
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    const parent = input.closest('.input-group');
+                    if (parent && parent.nextElementSibling?.classList.contains('error-message')) {
+                        parent.nextElementSibling.innerHTML = '';
+                    }
+                });
+            });
+        }
+
+        function clearAuthErrors(containerSelector) {
+            const container = document.querySelector(containerSelector);
+            if (container) {
+                const errors = container.querySelectorAll('.error-message');
+                errors.forEach(err => err.innerHTML = '');
+            }
+        }
+
+        function validateLoginForm() {
+            let isValid = true;
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const emailErr = document.getElementById('login-email-error');
+            const passErr = document.getElementById('login-pass-error');
+            if (emailErr) emailErr.innerHTML = '';
+            if (passErr) passErr.innerHTML = '';
+            if (!email) {
+                if (emailErr) emailErr.innerHTML = '<i class="fas fa-exclamation-circle"></i> Email is required';
+                isValid = false;
+            } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+                if (emailErr) emailErr.innerHTML = '<i class="fas fa-exclamation-circle"></i> Valid email required';
+                isValid = false;
+            }
+            if (!password) {
+                if (passErr) passErr.innerHTML = '<i class="fas fa-exclamation-circle"></i> Password required';
+                isValid = false;
+            } else if (password.length < 4) {
+                if (passErr) passErr.innerHTML = '<i class="fas fa-exclamation-circle"></i> Min 4 characters';
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        function validateSignupForm() {
+            let isValid = true;
+            const fullname = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-confirm').value;
+            const terms = document.getElementById('terms-checkbox').checked;
+
+            const nameErr = document.getElementById('signup-name-error');
+            const emailErr = document.getElementById('signup-email-error');
+            const passErr = document.getElementById('signup-pass-error');
+            const confirmErr = document.getElementById('signup-confirm-error');
+            const termsErr = document.getElementById('terms-error');
+            [nameErr, emailErr, passErr, confirmErr, termsErr].forEach(e => { if (e) e.innerHTML = ''; });
+
+            if (!fullname) { if (nameErr) nameErr.innerHTML = '<i class="fas fa-exclamation-circle"></i> Full name required'; isValid = false; }
+            else if (fullname.length < 2) { if (nameErr) nameErr.innerHTML = '<i class="fas fa-exclamation-circle"></i> At least 2 characters'; isValid = false; }
+            if (!email) { if (emailErr) emailErr.innerHTML = '<i class="fas fa-exclamation-circle"></i> Email required'; isValid = false; }
+            else if (!/^\S+@\S+\.\S+$/.test(email)) { if (emailErr) emailErr.innerHTML = '<i class="fas fa-exclamation-circle"></i> Valid email required'; isValid = false; }
+            if (!password) { if (passErr) passErr.innerHTML = '<i class="fas fa-exclamation-circle"></i> Password required'; isValid = false; }
+            else if (password.length < 6) { if (passErr) passErr.innerHTML = '<i class="fas fa-exclamation-circle"></i> Minimum 6 characters'; isValid = false; }
+            if (!confirm) { if (confirmErr) confirmErr.innerHTML = '<i class="fas fa-exclamation-circle"></i> Confirm password'; isValid = false; }
+            else if (password !== confirm) { if (confirmErr) confirmErr.innerHTML = '<i class="fas fa-exclamation-circle"></i> Passwords do not match'; isValid = false; }
+            if (!terms) { if (termsErr) termsErr.innerHTML = '<i class="fas fa-exclamation-circle"></i> Accept terms to continue'; isValid = false; }
+            return isValid;
+        }
+
+        function switchAuthTab(tabId) {
+            const loginPanel = document.getElementById('login-panel');
+            const signupPanel = document.getElementById('signup-panel');
+            const brandTitle = document.getElementById('dynamicBrandTitle');
+            const tabs = document.querySelectorAll('.tab-btn');
+            if (tabId === 'login') {
+                if (loginPanel) loginPanel.classList.remove('hidden-panel');
+                if (signupPanel) signupPanel.classList.add('hidden-panel');
+                if (brandTitle) brandTitle.textContent = 'welcome back';
+            } else {
+                if (loginPanel) loginPanel.classList.add('hidden-panel');
+                if (signupPanel) signupPanel.classList.remove('hidden-panel');
+                if (brandTitle) brandTitle.textContent = 'join the circle';
+            }
+            tabs.forEach(btn => {
+                const btnTab = btn.getAttribute('data-tab');
+                if (btnTab === tabId) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        // --- WELCOME INTERFACE after login
+        function renderWelcomeInterface() {
+            const sessionUser = getSession();
+            if (!sessionUser) {
+                // fallback, should not occur
+                renderAuthInterface();
+                return;
+            }
+            const user = sessionUser;
+            const firstName = user.fullname.split(' ')[0] || 'User';
+            const app = document.getElementById('appContainer');
+            document.title = `Welcome, ${firstName}!`;
+            app.innerHTML = `
+      <div class="welcome-container">
+        <div class="avatar-circle">
+          <i class="fas fa-user-astronaut"></i>
+        </div>
+        <div class="welcome-message">Hello, ${firstName}!</div>
+        <div class="user-email">
+          <i class="fas fa-envelope" style="font-size: 0.75rem;"></i> ${user.email}
+        </div>
+        <div class="info-card">
+          <p><i class="fas fa-check-circle" style="color:#10b981;"></i> You are securely signed in</p>
+          <p><i class="fas fa-clock" style="color:#8b5cf6;"></i> Session active</p>
+          <p><i class="fas fa-heart" style="color:#f43f5e;"></i> Welcome to your dashboard</p>
+        </div>
+        <button id="logoutButton" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+        <div class="footer-note" style="margin-top: 1.2rem;">
+          <span>🔒 You're in a protected area</span>
+        </div>
+      </div>
+    `;
+            const logoutBtn = document.getElementById('logoutButton');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    // Clear session
+                    currentUser = null;
+                    saveSession(null);
+                    localStorage.removeItem('remembered_email'); // optional, clear remembered email on logout for security
+                    showToast('🔓 Logged out successfully');
+                    renderAuthInterface();  // back to login/signup
+                });
+            }
+        }
+
+        // --- INIT: decide if user is logged in from sessionStorage
+        function initApp() {
+            const storedUser = getSession();
+            if (storedUser && storedUser.fullname && storedUser.email) {
+                currentUser = storedUser;
+                renderWelcomeInterface();
+            } else {
+                // preload demo user if no users exist
+                const users = getUsers();
+                if (users.length === 0) {
+                    saveUsers([
+                        { fullname: "Alex Morgan", email: "hello@example.com", password: "demo123" }
+                    ]);
+                }
+                renderAuthInterface();
+            }
+        }
+
+        initApp();
+    </script>
+</body>
+
+</html>
