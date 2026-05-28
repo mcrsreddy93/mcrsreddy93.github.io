@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Playwright Practice | Dropdown Testing Ground</title>
+    <style>
+        /* Minimal, clean base styling — functional, no modern frills */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f7f7f7;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            line-height: 1.45;
+            padding: 2rem 1.5rem;
+            color: #1e1e1e;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border: 1px solid #d4d4d4;
+            padding: 2rem 2rem 2.5rem 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        }
+
+        /* simple headings */
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 500;
+            border-left: 4px solid #2c7da0;
+            padding-left: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sub {
+            color: #4a5568;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #e2e2e2;
+            padding-bottom: 0.75rem;
+        }
+
+        /* grid for dropdown sections */
+        .dropdown-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 1px solid #dadce0;
+            padding: 1.2rem 1.2rem 1.5rem 1.2rem;
+            transition: none;
+        }
+
+        .card h3 {
+            font-weight: 500;
+            font-size: 1.25rem;
+            margin-bottom: 0.35rem;
+            color: #1f3b4c;
+        }
+
+        .card-desc {
+            font-size: 0.8rem;
+            color: #5e6f8d;
+            margin-bottom: 1.2rem;
+            border-left: 2px solid #e2e8f0;
+            padding-left: 0.6rem;
+        }
+
+        select,
+        .custom-select-trigger,
+        .multi-select,
+        .datalist-input {
+            width: 100%;
+            padding: 0.6rem 0.5rem;
+            font-size: 0.9rem;
+            border: 1px solid #b9bfc9;
+            background: #fff;
+            cursor: pointer;
+            font-family: inherit;
+            border-radius: 0px;
+        }
+
+        select:focus,
+        .custom-select-trigger:focus,
+        .multi-select:focus,
+        .datalist-input:focus {
+            outline: none;
+            border-color: #1e6f5c;
+            box-shadow: 0 0 0 1px #1e6f5c;
+        }
+
+        /* custom dropdown (simulated select) */
+        .custom-select {
+            position: relative;
+            width: 100%;
+        }
+
+        .custom-select-trigger {
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .custom-select-trigger::after {
+            content: "▼";
+            font-size: 0.7rem;
+            color: #5b6e8c;
+            transition: none;
+        }
+
+        .custom-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #cbd5e0;
+            border-top: none;
+            z-index: 20;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .custom-options li {
+            padding: 0.55rem 0.7rem;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            font-size: 0.85rem;
+        }
+
+        .custom-options li:hover {
+            background-color: #f0f2f5;
+        }
+
+        .custom-select.open .custom-options {
+            display: block;
+        }
+
+        /* multi-select with size */
+        .multi-select {
+            height: auto;
+            min-height: 100px;
+            cursor: pointer;
+        }
+
+        /* group select */
+        optgroup {
+            font-style: normal;
+            font-weight: 600;
+            background: #f9f9fc;
+        }
+
+        /* disabled select example */
+        select:disabled {
+            background-color: #f1f1f1;
+            color: #7b7b7b;
+            cursor: not-allowed;
+        }
+
+        /* output panels */
+        .output-area {
+            margin-top: 1.8rem;
+            background: #faf9f8;
+            border: 1px solid #e5e5e5;
+            padding: 1rem 1.2rem;
+        }
+
+        .output-area p {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            margin: 0.35rem 0;
+            word-break: break-word;
+        }
+
+        .live-feedback {
+            color: #1e466e;
+        }
+
+        hr {
+            margin: 1rem 0;
+            border: none;
+            border-top: 1px solid #e2e2e2;
+        }
+
+        button {
+            background: none;
+            border: 1px solid #bcbcbc;
+            padding: 0.4rem 1rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            background: #fefefe;
+            transition: 0.05s linear;
+            font-family: monospace;
+        }
+
+        button:hover {
+            background-color: #ececec;
+        }
+
+        .small-note {
+            font-size: 0.7rem;
+            color: #6f6f6f;
+            margin-top: 0.25rem;
+        }
+
+        footer {
+            margin-top: 1.2rem;
+            font-size: 0.7rem;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #e9e9e9;
+            padding-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎯 Playwright Dropdown Practice</h1>
+        <div class="sub">Different dropdown flavors | minimal interface for reliable automation</div>
+
+        <div class="dropdown-grid">
+            <!-- 1. Basic native select -->
+            <div class="card">
+                <h3>1. Native Select</h3>
+                <div class="card-desc">Standard HTML select — easy <code>selectOption</code></div>
+                <select id="nativeSelect" aria-label="Standard select">
+                    <option value="" disabled selected>-- choose an option --</option>
+                    <option value="apple">Apple</option>
+                    <option value="banana">Banana</option>
+                    <option value="cherry">Cherry</option>
+                    <option value="date">Date</option>
+                </select>
+                <div class="small-note">✔ Playwright: page.selectOption('#nativeSelect', 'cherry')</div>
+            </div>
+
+            <!-- 2. Select with optgroup (grouped) -->
+            <div class="card">
+                <h3>2. Grouped Select</h3>
+                <div class="card-desc">Optgroup categories: frontend / backend</div>
+                <select id="groupedSelect" aria-label="Grouped dropdown">
+                    <optgroup label="🖥️ Frontend">
+                        <option value="react">React</option>
+                        <option value="vue">Vue</option>
+                        <option value="svelte">Svelte</option>
+                    </optgroup>
+                    <optgroup label="⚙️ Backend">
+                        <option value="node">Node.js</option>
+                        <option value="python">Python</option>
+                        <option value="go">Go</option>
+                    </optgroup>
+                </select>
+                <div class="small-note">Use <code>selectOption</code> with value/text</div>
+            </div>
+
+            <!-- 3. Custom JS-driven dropdown (div-based) -->
+            <div class="card">
+                <h3>3. Custom JS Dropdown</h3>
+                <div class="card-desc">Simulated dropdown — needs click + option selection</div>
+                <div class="custom-select" id="customSelectRoot">
+                    <div class="custom-select-trigger" id="customSelectTrigger" role="combobox" aria-haspopup="listbox"
+                        aria-expanded="false">
+                        <span id="selectedCustomValue">Select a framework</span>
+                    </div>
+                    <ul class="custom-options" id="customOptionsList" role="listbox">
+                        <li data-value="playwright">Playwright</li>
+                        <li data-value="cypress">Cypress</li>
+                        <li data-value="selenium">Selenium</li>
+                        <li data-value="puppeteer">Puppeteer</li>
+                    </ul>
+                </div>
+                <div class="small-note">🎭 Playwright: click trigger, then click li → check value</div>
+            </div>
+
+            <!-- 4. Multi-select (select with multiple) -->
+            <div class="card">
+                <h3>4. Multiple Select</h3>
+                <div class="card-desc">Hold Ctrl/Cmd to select multiple options</div>
+                <select id="multiSelect" multiple size="4" aria-label="Multi select example">
+                    <option value="red">Red</option>
+                    <option value="green">Green</option>
+                    <option value="blue">Blue</option>
+                    <option value="yellow">Yellow</option>
+                    <option value="black">Black</option>
+                </select>
+                <div class="small-note">Playwright: <code>.selectOption(['red','blue'])</code></div>
+            </div>
+
+            <!-- 5. Datalist (input + suggestions) -->
+            <div class="card">
+                <h3>5. Datalist (ComboBox)</h3>
+                <div class="card-desc">Native input with dropdown suggestions</div>
+                <input list="frameworksList" id="datalistInput" class="datalist-input" placeholder="Type or select..."
+                    autocomplete="off">
+                <datalist id="frameworksList">
+                    <option value="Playwright">
+                    <option value="Cypress">
+                    <option value="TestCafe">
+                    <option value="WebDriverIO">
+                    <option value="Jest">
+                </datalist>
+                <div class="small-note">Interact like input → dropdown appears</div>
+            </div>
+
+            <!-- 6. Disabled select (non-interactive) -->
+            <div class="card">
+                <h3>6. Disabled Select</h3>
+                <div class="card-desc">Inert element — should not be selectable</div>
+                <select id="disabledSelect" disabled aria-label="Disabled dropdown">
+                    <option>Disabled option 1</option>
+                    <option>Disabled option 2</option>
+                </select>
+                <div class="small-note">Playwright: check <code>toBeDisabled()</code> assertion</div>
+            </div>
+        </div>
+
+        <!-- Additional interactive section: Live feedback area (to verify dropdown selections) -->
+        <div class="output-area">
+            <strong>📋 Live selection tracker</strong> <span style="font-weight: normal;">(verifies dropdown
+                changes)</span>
+            <hr>
+            <div id="feedbackPanel">
+                <p><span class="live-feedback">⚡ Native select:</span> <span id="nativeFeedback">—</span></p>
+                <p><span class="live-feedback">📁 Grouped select:</span> <span id="groupedFeedback">—</span></p>
+                <p><span class="live-feedback">🖱️ Custom JS dropdown:</span> <span id="customFeedback">—</span></p>
+                <p><span class="live-feedback">🔘 Multi-select (selected values):</span> <span
+                        id="multiFeedback">—</span></p>
+                <p><span class="live-feedback">📝 Datalist current value:</span> <span id="datalistFeedback">—</span>
+                </p>
+            </div>
+            <button type="button" id="clearFeedbackBtn" style="margin-top: 0.5rem;">⟳ Reset tracker</button>
+            <div class="small-note" style="margin-top: 0.6rem;">Each dropdown update updates respective field — great
+                for Playwright assertions.</div>
+        </div>
+
+        <!-- extra hint for playwright tests -->
+        <footer>
+            🧪 Practice selectors: #nativeSelect, #groupedSelect, .custom-select, #multiSelect, #datalistInput,
+            #disabledSelect <br>
+            Custom dropdown: click #customSelectTrigger then pick option from ul[role=listbox]
+        </footer>
+    </div>
+
+    <script>
+        (function () {
+            // --------------------- 1. Native Select feedback --------------------
+            const nativeSelect = document.getElementById('nativeSelect');
+            const nativeFeedback = document.getElementById('nativeFeedback');
+            function updateNative() {
+                const selectedOption = nativeSelect.options[nativeSelect.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    nativeFeedback.textContent = `${selectedOption.text} (value: ${selectedOption.value})`;
+                } else {
+                    nativeFeedback.textContent = '—';
+                }
+            }
+            if (nativeSelect) {
+                nativeSelect.addEventListener('change', updateNative);
+                updateNative();
+            }
+
+            // --------------------- 2. Grouped select feedback -----------------
+            const groupedSelect = document.getElementById('groupedSelect');
+            const groupedFeedback = document.getElementById('groupedFeedback');
+            function updateGrouped() {
+                const selected = groupedSelect.options[groupedSelect.selectedIndex];
+                if (selected && selected.value) {
+                    groupedFeedback.textContent = `${selected.text} (${selected.value})`;
+                } else {
+                    groupedFeedback.textContent = '—';
+                }
+            }
+            if (groupedSelect) {
+                groupedSelect.addEventListener('change', updateGrouped);
+                updateGrouped();
+            }
+
+            // --------------------- 3. Custom JS Dropdown logic ----------------
+            const customRoot = document.getElementById('customSelectRoot');
+            const trigger = document.getElementById('customSelectTrigger');
+            const optionsList = document.getElementById('customOptionsList');
+            const selectedSpan = document.getElementById('selectedCustomValue');
+            const customFeedbackSpan = document.getElementById('customFeedback');
+
+            let currentCustomValue = '';
+            function closeCustomDropdown() {
+                if (customRoot) customRoot.classList.remove('open');
+                if (trigger) trigger.setAttribute('aria-expanded', 'false');
+            }
+            function openCustomDropdown() {
+                if (customRoot) customRoot.classList.add('open');
+                if (trigger) trigger.setAttribute('aria-expanded', 'true');
+            }
+            function setCustomValue(value, text) {
+                currentCustomValue = value;
+                selectedSpan.textContent = text;
+                if (customFeedbackSpan) customFeedbackSpan.textContent = `${text} (${value})`;
+                closeCustomDropdown();
+            }
+            if (trigger) {
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (customRoot.classList.contains('open')) {
+                        closeCustomDropdown();
+                    } else {
+                        openCustomDropdown();
+                    }
+                });
+            }
+            // handle option clicks
+            const customOptionsItems = document.querySelectorAll('#customOptionsList li');
+            customOptionsItems.forEach(li => {
+                li.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const value = li.getAttribute('data-value');
+                    const text = li.innerText;
+                    if (value) {
+                        setCustomValue(value, text);
+                    } else {
+                        setCustomValue(text.toLowerCase(), text);
+                    }
+                    // dispatch custom event for potential testing
+                    const changeEvt = new Event('customChange', { bubbles: true });
+                    if (customRoot) customRoot.dispatchEvent(changeEvt);
+                });
+            });
+            // close dropdown when clicking outside
+            document.addEventListener('click', function (e) {
+                if (customRoot && !customRoot.contains(e.target)) {
+                    closeCustomDropdown();
+                }
+            });
+            // initial default
+            if (selectedSpan && selectedSpan.innerText === 'Select a framework') {
+                setCustomValue('playwright', 'Playwright');
+            } else {
+                // sync if needed
+                const initText = selectedSpan ? selectedSpan.innerText : '';
+                if (initText && initText !== 'Select a framework') customFeedbackSpan.textContent = initText;
+            }
+
+            // --------------------- 4. Multi-select feedback --------------------
+            const multiSelect = document.getElementById('multiSelect');
+            const multiFeedback = document.getElementById('multiFeedback');
+            function updateMultiFeedback() {
+                if (!multiSelect) return;
+                const selectedOptions = Array.from(multiSelect.selectedOptions);
+                if (selectedOptions.length === 0) {
+                    multiFeedback.textContent = 'none selected';
+                    return;
+                }
+                const values = selectedOptions.map(opt => `${opt.text} (${opt.value})`).join(', ');
+                multiFeedback.textContent = values;
+            }
+            if (multiSelect) {
+                multiSelect.addEventListener('change', updateMultiFeedback);
+                updateMultiFeedback();
+            }
+
+            // --------------------- 5. Datalist feedback (input event) ----------
+            const datalistInput = document.getElementById('datalistInput');
+            const datalistFeedback = document.getElementById('datalistFeedback');
+            function updateDatalistFeedback() {
+                if (datalistInput) {
+                    const val = datalistInput.value.trim();
+                    datalistFeedback.textContent = val === '' ? '—' : val;
+                }
+            }
+            if (datalistInput) {
+                datalistInput.addEventListener('input', updateDatalistFeedback);
+                datalistInput.addEventListener('change', updateDatalistFeedback);
+                updateDatalistFeedback();
+            }
+
+            // --------------------- Reset button for tracker --------------------
+            const resetBtn = document.getElementById('clearFeedbackBtn');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    // reset native to first disabled placeholder if possible, else default
+                    if (nativeSelect && nativeSelect.options.length > 0) {
+                        nativeSelect.selectedIndex = 0;
+                        updateNative();
+                    }
+                    // grouped reset: select first option (usually react)
+                    if (groupedSelect && groupedSelect.options.length) {
+                        groupedSelect.selectedIndex = 0;
+                        updateGrouped();
+                    }
+                    // reset custom dropdown to Playwright
+                    setCustomValue('playwright', 'Playwright');
+                    // reset multi-select: clear all selections
+                    if (multiSelect) {
+                        for (let i = 0; i < multiSelect.options.length; i++) {
+                            multiSelect.options[i].selected = false;
+                        }
+                        updateMultiFeedback();
+                    }
+                    // reset datalist input field to empty
+                    if (datalistInput) {
+                        datalistInput.value = '';
+                        updateDatalistFeedback();
+                    }
+                    // additionally force any extra stuff 
+                    const customEvent = new Event('change', { bubbles: true });
+                    if (nativeSelect) nativeSelect.dispatchEvent(customEvent);
+                    if (groupedSelect) groupedSelect.dispatchEvent(customEvent);
+                    if (multiSelect) multiSelect.dispatchEvent(customEvent);
+                });
+            }
+
+            // extra: ensure customFeedback initial state in sync
+            if (currentCustomValue === '' && selectedSpan && selectedSpan.innerText !== 'Select a framework') {
+                const currentText = selectedSpan.innerText;
+                let detectedVal = currentText.toLowerCase();
+                if (currentText === 'Playwright') detectedVal = 'playwright';
+                customFeedbackSpan.textContent = `${currentText} (${detectedVal})`;
+            } else if (customFeedbackSpan && currentCustomValue) {
+                const optText = selectedSpan ? selectedSpan.innerText : currentCustomValue;
+                customFeedbackSpan.textContent = `${optText} (${currentCustomValue})`;
+            }
+
+            // also listen if any other reset logic: update all after any manual action
+            // making everything consistent
+            window.addEventListener('load', function () {
+                updateNative();
+                updateGrouped();
+                updateMultiFeedback();
+                updateDatalistFeedback();
+                if (customFeedbackSpan && selectedSpan) {
+                    const currText = selectedSpan.innerText;
+                    let val = currentCustomValue || (currText === 'Playwright' ? 'playwright' : currText.toLowerCase());
+                    customFeedbackSpan.textContent = `${currText} (${val})`;
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>
