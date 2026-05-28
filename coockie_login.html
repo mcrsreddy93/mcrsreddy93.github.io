@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🔐 Cookie Auth | Login Demo (ranga / ranga123)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a3a 0%, #0f1a24 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        .auth-container {
+            max-width: 480px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(2px);
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.45), 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .auth-header {
+            background: #2c3e2f;
+            padding: 1.8rem 2rem;
+            text-align: center;
+            color: #f7e5c2;
+            border-bottom: 3px solid #d4a373;
+        }
+
+        .auth-header h1 {
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-weight: 700;
+        }
+
+        .badge-demo {
+            background: #e9b35f;
+            color: #2c3e2f;
+            border-radius: 60px;
+            padding: 0.3rem 0.9rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        .content-panel {
+            padding: 2rem 2rem 2rem 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2c3e2f;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+        }
+
+        .input-icon {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon span {
+            position: absolute;
+            left: 14px;
+            font-size: 1.2rem;
+            pointer-events: none;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.9rem 1rem 0.9rem 2.8rem;
+            border: 1.8px solid #e2d9ce;
+            border-radius: 1.5rem;
+            font-size: 1rem;
+            background: #fffef8;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #d4a373;
+            box-shadow: 0 0 0 3px rgba(212, 163, 115, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.9rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            background: #2c3e2f;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 0.5rem;
+        }
+
+        button:hover {
+            background: #1e2a21;
+            transform: translateY(-2px);
+        }
+
+        .logout-btn {
+            background: #6b4e3a;
+            margin-top: 1rem;
+        }
+
+        .logout-btn:hover {
+            background: #543c2c;
+        }
+
+        .info-card {
+            background: #fef7e8;
+            border-radius: 1.5rem;
+            padding: 1rem;
+            margin: 1.2rem 0;
+            border-left: 6px solid #d4a373;
+            font-size: 0.85rem;
+        }
+
+        .cookie-status {
+            background: #ecf3e9;
+            border-radius: 1.2rem;
+            padding: 0.7rem 1rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            word-break: break-all;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .badge-status {
+            background: #2c3e2f;
+            color: #f0e2b6;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+        }
+
+        .welcome-message {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        hr {
+            margin: 1rem 0;
+            border: 0;
+            height: 1px;
+            background: #e0d4c4;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        small {
+            color: #7e6b55;
+        }
+
+        .flex-btns {
+            display: flex;
+            gap: 12px;
+        }
+
+        .secondary-btn {
+            background: #b9aa93;
+        }
+
+        .secondary-btn:hover {
+            background: #9a8972;
+        }
+
+        .success-message {
+            background: #2e7d32;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-container" id="appRoot">
+        <div class="auth-header">
+            <h1>
+                <span>🍪</span> Cookie Vault
+            </h1>
+            <div class="badge-demo">demo: ranga / ranga123</div>
+        </div>
+
+        <div class="content-panel">
+            <!-- LOGIN PANEL (visible when not logged in) -->
+            <div id="loginPanel">
+                <div class="info-card">
+                    🔐 <strong>Test credentials</strong><br>
+                    👤 Username: <code>ranga</code><br>
+                    🔑 Password: <code>ranga123</code>
+                </div>
+
+                <div class="form-group">
+                    <label>👤 Username</label>
+                    <div class="input-icon">
+                        <span>🧑</span>
+                        <input type="text" id="username" placeholder="Enter username" autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>🔒 Password</label>
+                    <div class="input-icon">
+                        <span>🔑</span>
+                        <input type="password" id="password" placeholder="•••••••">
+                    </div>
+                </div>
+
+                <button id="loginBtn">
+                    🍪 Login & Save Cookie
+                </button>
+                <div id="loginError" class="text-center" style="margin-top: 1rem; color: #c25e3a; font-size: 0.8rem;">
+                </div>
+            </div>
+
+            <!-- DASHBOARD PANEL (visible when logged in via cookie) -->
+            <div id="dashboardPanel" class="hidden">
+                <div class="welcome-message">
+                    🎉 Welcome, <span id="displayUsername">ranga</span>!
+                </div>
+                <p style="margin-bottom: 0.5rem; color: #4a5b44;">✅ You are authenticated using a secure session cookie.
+                </p>
+
+                <div class="cookie-status">
+                    <span>🍪 <strong>auth_session cookie</strong> status:</span>
+                    <span id="cookieIndicator" class="badge-status">active ✓</span>
+                </div>
+
+                <div class="info-card">
+                    💡 <strong>Cookie-based login</strong> — your session is stored in a cookie named
+                    <code>auth_session</code>.<br>
+                    🔄 Refresh the page: you stay logged in!<br>
+                    🧪 Playwright / devtools can inspect <code>document.cookie</code>.
+                </div>
+
+                <div class="flex-btns">
+                    <button id="logoutBtn" class="logout-btn">
+                        🚪 Logout & Destroy Cookie
+                    </button>
+                    <button id="refreshStatusBtn" class="secondary-btn">
+                        🔄 Verify Cookie
+                    </button>
+                </div>
+            </div>
+
+            <!-- extra cookie debug section -->
+            <hr>
+            <div style="font-size: 0.75rem; text-align: center; color: #7d6b58;">
+                <span>🍪 All authentication uses secure cookie with path=/ + SameSite=Lax<br>
+                    📌 Cookie: <code>auth_session</code> = encrypted base64 username + expiration (1 hour
+                    session).</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // credentials
+            const VALID_USERNAME = "ranga";
+            const VALID_PASSWORD = "ranga123";
+            const COOKIE_NAME = "auth_session";
+
+            // Helper: set a cookie with attributes
+            function setCookie(name, value, maxAgeSeconds = 3600) {
+                let cookieString = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; path=/; SameSite=Lax`;
+                if (maxAgeSeconds && maxAgeSeconds > 0) {
+                    cookieString += `; max-age=${maxAgeSeconds}`;
+                }
+                document.cookie = cookieString;
+                console.log("Cookie set:", cookieString);
+            }
+
+            // get cookie value by name
+            function getCookie(name) {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    let cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        const value = decodeURIComponent(cookie.substring(name.length + 1));
+                        console.log("Cookie found:", name, "=", value);
+                        return value;
+                    }
+                }
+                console.log("Cookie not found:", name);
+                return null;
+            }
+
+            // delete cookie
+            function deleteCookie(name) {
+                document.cookie = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+                console.log("Cookie deleted:", name);
+            }
+
+            // create session payload
+            function generateSessionPayload(username) {
+                const payload = {
+                    user: username,
+                    loginTime: Date.now(),
+                    expiry: Date.now() + 3600 * 1000  // 1 hour
+                };
+                return btoa(JSON.stringify(payload));
+            }
+
+            // verify session cookie and return username if valid
+            function verifySessionCookie() {
+                const cookieVal = getCookie(COOKIE_NAME);
+                if (!cookieVal) {
+                    console.log("No cookie found");
+                    return null;
+                }
+
+                try {
+                    const decoded = JSON.parse(atob(cookieVal));
+                    console.log("Decoded cookie:", decoded);
+
+                    if (decoded.user && decoded.expiry && decoded.expiry > Date.now()) {
+                        if (decoded.user === VALID_USERNAME) {
+                            console.log("Cookie valid for user:", decoded.user);
+                            return decoded.user;
+                        }
+                    }
+                    console.log("Cookie expired or invalid");
+                    return null;
+                } catch (e) {
+                    console.warn("Error parsing cookie:", e);
+                    return null;
+                }
+            }
+
+            // login function
+            function performLogin(username, password) {
+                const errorDiv = document.getElementById('loginError');
+
+                if (!username || !password) {
+                    errorDiv.innerText = "❌ Please enter both username and password.";
+                    return false;
+                }
+
+                if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+                    // Generate session token
+                    const sessionToken = generateSessionPayload(username);
+                    setCookie(COOKIE_NAME, sessionToken, 3600);
+                    errorDiv.innerText = "";
+
+                    // Show success message briefly
+                    errorDiv.style.color = "#2e7d32";
+                    errorDiv.innerText = "✅ Login successful! Redirecting...";
+
+                    // Update UI after successful login
+                    setTimeout(() => {
+                        updateUIAfterAuth();
+                        errorDiv.style.color = "#c25e3a";
+                        errorDiv.innerText = "";
+                    }, 500);
+
+                    return true;
+                } else {
+                    errorDiv.innerText = "❌ Invalid credentials. Use ranga / ranga123";
+                    return false;
+                }
+            }
+
+            // logout function
+            function performLogout() {
+                deleteCookie(COOKIE_NAME);
+                updateUIAfterAuth();
+
+                // Clear input fields
+                const userField = document.getElementById('username');
+                const passField = document.getElementById('password');
+                if (userField) userField.value = "";
+                if (passField) passField.value = "";
+
+                // Show logout message
+                const errorDiv = document.getElementById('loginError');
+                if (errorDiv) {
+                    errorDiv.style.color = "#2e7d32";
+                    errorDiv.innerText = "🔓 Logged out successfully!";
+                    setTimeout(() => {
+                        if (errorDiv) {
+                            errorDiv.style.color = "#c25e3a";
+                            errorDiv.innerText = "";
+                        }
+                    }, 2000);
+                }
+            }
+
+            // refresh cookie verification and update UI
+            function updateUIAfterAuth() {
+                const loggedInUser = verifySessionCookie();
+                const loginPanel = document.getElementById('loginPanel');
+                const dashboardPanel = document.getElementById('dashboardPanel');
+                const displayNameSpan = document.getElementById('displayUsername');
+                const cookieIndicatorSpan = document.getElementById('cookieIndicator');
+
+                console.log("Updating UI - loggedInUser:", loggedInUser);
+
+                if (loggedInUser) {
+                    // Show dashboard, hide login
+                    if (loginPanel) loginPanel.classList.add('hidden');
+                    if (dashboardPanel) dashboardPanel.classList.remove('hidden');
+                    if (displayNameSpan) displayNameSpan.innerText = loggedInUser;
+                    if (cookieIndicatorSpan) {
+                        cookieIndicatorSpan.innerHTML = `🍪 active (${COOKIE_NAME})`;
+                        cookieIndicatorSpan.style.background = "#2e7d32";
+                    }
+                    console.log("Dashboard shown for user:", loggedInUser);
+                } else {
+                    // Show login, hide dashboard
+                    if (loginPanel) loginPanel.classList.remove('hidden');
+                    if (dashboardPanel) dashboardPanel.classList.add('hidden');
+                    console.log("Login panel shown");
+                }
+            }
+
+            // manual refresh status
+            function refreshCookieStatus() {
+                const user = verifySessionCookie();
+                const cookieIndicator = document.getElementById('cookieIndicator');
+
+                if (user && cookieIndicator && !document.getElementById('dashboardPanel').classList.contains('hidden')) {
+                    cookieIndicator.innerHTML = "✅ Cookie verified!";
+                    cookieIndicator.style.background = "#2e7d32";
+                    setTimeout(() => {
+                        if (cookieIndicator) {
+                            cookieIndicator.innerHTML = `🍪 active (${COOKIE_NAME})`;
+                        }
+                    }, 2000);
+                } else if (!user) {
+                    updateUIAfterAuth();
+                }
+
+                // Show feedback toast
+                const toast = document.createElement('div');
+                toast.style.position = 'fixed';
+                toast.style.bottom = '20px';
+                toast.style.left = '50%';
+                toast.style.transform = 'translateX(-50%)';
+                toast.style.background = user ? '#2e7d32' : '#c25e3a';
+                toast.style.color = 'white';
+                toast.style.padding = '8px 18px';
+                toast.style.borderRadius = '40px';
+                toast.style.fontSize = '0.8rem';
+                toast.style.zIndex = '999';
+                toast.style.fontWeight = '500';
+                toast.style.pointerEvents = 'none';
+                toast.innerText = user ? '✅ Session cookie valid' : '🔍 No valid session cookie';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2000);
+            }
+
+            // Event binding
+            function bindEvents() {
+                const loginBtn = document.getElementById('loginBtn');
+                const logoutBtn = document.getElementById('logoutBtn');
+                const refreshBtn = document.getElementById('refreshStatusBtn');
+
+                if (loginBtn) {
+                    loginBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const usernameInput = document.getElementById('username').value.trim();
+                        const passwordInput = document.getElementById('password').value;
+                        performLogin(usernameInput, passwordInput);
+                    });
+                }
+
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        performLogout();
+                    });
+                }
+
+                if (refreshBtn) {
+                    refreshBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        refreshCookieStatus();
+                    });
+                }
+
+                // Enter key support
+                const passwordField = document.getElementById('password');
+                const usernameField = document.getElementById('username');
+
+                if (passwordField) {
+                    passwordField.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const usernameVal = usernameField ? usernameField.value.trim() : '';
+                            const passVal = passwordField.value;
+                            performLogin(usernameVal, passVal);
+                        }
+                    });
+                }
+
+                if (usernameField) {
+                    usernameField.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const passVal = passwordField ? passwordField.value : '';
+                            performLogin(usernameField.value.trim(), passVal);
+                        }
+                    });
+                }
+            }
+
+            // Check cookie on page load and every 2 seconds (for cookie changes)
+            function startCookieMonitor() {
+                // Initial check
+                updateUIAfterAuth();
+
+                // Monitor for cookie changes (useful for Playwright testing)
+                setInterval(() => {
+                    updateUIAfterAuth();
+                }, 2000);
+            }
+
+            // Expose API for Playwright testing
+            window.__cookieTestAPI = {
+                getSessionCookie: () => getCookie(COOKIE_NAME),
+                isLoggedIn: () => !!verifySessionCookie(),
+                login: (un, pw) => performLogin(un, pw),
+                logout: () => performLogout(),
+                getValidCreds: () => ({ username: VALID_USERNAME, password: VALID_PASSWORD }),
+                getCookieName: () => COOKIE_NAME
+            };
+
+            // Initialize
+            bindEvents();
+            startCookieMonitor();
+            console.log("Cookie Auth System initialized");
+        })();
+    </script>
+</body>
+
+</html>
