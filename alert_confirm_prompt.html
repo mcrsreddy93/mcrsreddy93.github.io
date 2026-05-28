@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Playwright Practice Lab | Alert, Confirm, Prompt</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e9f0fc 0%, #d9e3f0 100%);
+            font-family: 'Segoe UI', Roboto, system-ui, 'Helvetica Neue', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        /* main card container */
+        .playwright-lab {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(2px);
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        /* header area */
+        .lab-header {
+            background: #1a2c3e;
+            color: white;
+            padding: 1.8rem 2rem;
+            text-align: center;
+        }
+
+        .lab-header h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .lab-header h1 span {
+            background: #ffb347;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #1e2f3e;
+            vertical-align: middle;
+        }
+
+        .lab-header p {
+            margin-top: 0.6rem;
+            opacity: 0.85;
+            font-size: 0.95rem;
+        }
+
+        /* main content */
+        .card-panel {
+            padding: 2rem 2rem 2rem 2rem;
+        }
+
+        /* demo result panel */
+        .result-area {
+            background: #f8fafd;
+            border-radius: 1.5rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #cbdde9;
+            box-shadow: inset 0 1px 3px #0001, 0 2px 4px #fff9;
+        }
+
+        .result-title {
+            font-weight: 600;
+            color: #1f4a6e;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-title i {
+            font-style: normal;
+            font-weight: bold;
+            background: #e2eaf1;
+            padding: 0 6px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+
+        #liveFeedback {
+            background: #ffffff;
+            border-radius: 1rem;
+            padding: 1rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.95rem;
+            color: #0a2b3e;
+            border-left: 5px solid #2c7da0;
+            word-break: break-word;
+            white-space: pre-wrap;
+            line-height: 1.4;
+            min-height: 75px;
+            transition: 0.1s;
+        }
+
+        /* button grid */
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            justify-content: center;
+            margin: 2rem 0 1.5rem 0;
+        }
+
+        .btn {
+            border: none;
+            background: white;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 0.9rem 1.8rem;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: inherit;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: #2c7da0;
+            color: white;
+            box-shadow: 0 8px 18px -8px #2c7da080;
+        }
+
+        .btn-primary:hover {
+            background: #1f5e7a;
+            transform: translateY(-2px);
+            box-shadow: 0 14px 22px -10px #1f5e7a;
+        }
+
+        .btn-warning {
+            background: #e9b35f;
+            color: #2d3e4b;
+        }
+
+        .btn-warning:hover {
+            background: #dd9f3a;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #4b6f88;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #3a5970;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #2c7da0;
+            color: #2c7da0;
+        }
+
+        .btn-outline:hover {
+            background: #2c7da015;
+            transform: scale(0.98);
+        }
+
+        .reset-btn {
+            background: #eef2f7;
+            color: #3a5a6e;
+            border: 1px solid #cbdde9;
+        }
+
+        .reset-btn:hover {
+            background: #e2e8f0;
+        }
+
+        /* info & utilities */
+        .info-note {
+            background: #eef3fa;
+            border-radius: 1rem;
+            padding: 1rem 1.3rem;
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            border-left: 3px solid #2c7da0;
+            color: #1f4a6e;
+        }
+
+        .info-note details {
+            margin-top: 6px;
+        }
+
+        .info-note summary {
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .code-snip {
+            background: #1e2f3c;
+            color: #d4f1f9;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            margin-top: 8px;
+            overflow-x: auto;
+        }
+
+        hr {
+            margin: 1rem 0;
+            border: 0;
+            height: 1px;
+            background: linear-gradient(90deg, #c0d4e4, transparent);
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 1rem;
+            background: #eef2f7;
+            color: #4e6b7e;
+            border-top: 1px solid #d4e2ed;
+        }
+
+        @media (max-width: 550px) {
+            .button-group {
+                gap: 0.8rem;
+            }
+
+            .btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.9rem;
+            }
+
+            .card-panel {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="playwright-lab">
+        <div class="lab-header">
+            <h1>
+                🎭 Playwright Practice Studio
+                <span>alert · confirm · prompt</span>
+            </h1>
+            <p>Test native browser dialogs — ideal for Playwright automation scripts</p>
+        </div>
+
+        <div class="card-panel">
+            <!-- Live feedback panel: shows dialog results -->
+            <div class="result-area">
+                <div class="result-title">
+                    📋 INTERACTION FEEDBACK &nbsp;<i>live log</i>
+                </div>
+                <div id="liveFeedback">
+                    💡 Click any button to trigger dialog.<br>
+                    → Results from confirm/prompt will appear here.<br>
+                    → Alert only shows a message (console also logs).
+                </div>
+            </div>
+
+            <!-- Main action buttons -->
+            <div class="button-group">
+                <button class="btn btn-primary" id="alertBtn" aria-label="Trigger alert dialog">
+                    ⚠️ Alert
+                </button>
+                <button class="btn btn-warning" id="confirmBtn" aria-label="Trigger confirm dialog">
+                    ❓ Confirm
+                </button>
+                <button class="btn btn-secondary" id="promptBtn" aria-label="Trigger prompt dialog">
+                    📝 Prompt
+                </button>
+                <button class="btn reset-btn" id="clearFeedbackBtn" aria-label="Clear feedback panel">
+                    🧹 Clear log
+                </button>
+            </div>
+
+            <!-- Quick test variations & utilities -->
+            <div class="button-group" style="margin-top: 0; gap: 0.9rem;">
+                <button class="btn btn-outline" id="asyncConfirmBtn" style="font-size:0.85rem;">
+                    ⏱️ Confirm with default message
+                </button>
+                <button class="btn btn-outline" id="prefilledPromptBtn" style="font-size:0.85rem;">
+                    ✏️ Prompt (prefilled "Playwright")
+                </button>
+            </div>
+
+            <!-- Extra hidden / visible details for playwright tips -->
+            <div class="info-note">
+                <details>
+                    <summary>🧪 Playwright test hints — handling dialogs</summary>
+                    <div style="margin-top: 12px;">
+                        <p>✅ Use <code>page.on('dialog')</code> or <code>page.waitForEvent('dialog')</code>.<br>
+                            ✅ Accept / dismiss / type text into prompt.<br>
+                            ✅ Example snippet:</p>
+                        <div class="code-snip">
+                            // Accept alert<br>
+                            page.once('dialog', dialog => dialog.accept());<br>
+                            await page.click('#alertBtn');<br><br>
+                            // Confirm with accept/reject<br>
+                            page.once('dialog', dialog => dialog.accept());<br>
+                            // Or dialog.dismiss();<br><br>
+                            // Prompt: accept with text<br>
+                            page.once('dialog', dialog => dialog.accept('my text'));<br>
+                            await page.click('#promptBtn');
+                        </div>
+                        <p style="margin-top: 10px;">⭐ All dialogs on this page are native browser dialogs — fully
+                            compatible with Playwright's <strong>Dialog</strong> methods.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+        <footer>
+            🎭 Native JavaScript dialogs | Use Playwright's `page.on('dialog')` to interact | Feedback panel records
+            results
+        </footer>
+    </div>
+
+    <script>
+        (function () {
+            // DOM elements
+            const feedbackDiv = document.getElementById('liveFeedback');
+            const alertBtn = document.getElementById('alertBtn');
+            const confirmBtn = document.getElementById('confirmBtn');
+            const promptBtn = document.getElementById('promptBtn');
+            const clearBtn = document.getElementById('clearFeedbackBtn');
+            const asyncConfirmBtn = document.getElementById('asyncConfirmBtn');
+            const prefilledPromptBtn = document.getElementById('prefilledPromptBtn');
+
+            // helper: append message to feedback panel with timestamp
+            function addFeedback(message, isError = false) {
+                const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const prefix = `[${timestamp}]`;
+                const p = document.createElement('div');
+                p.style.marginBottom = '6px';
+                p.style.borderBottom = '1px solid #e2edf2';
+                p.style.paddingBottom = '4px';
+                p.style.fontFamily = 'monospace';
+                if (isError) {
+                    p.style.color = '#bc5a2c';
+                    p.innerHTML = `${prefix} ⚠️ ${message}`;
+                } else {
+                    p.style.color = '#1a5d7a';
+                    p.innerHTML = `${prefix} ✅ ${message}`;
+                }
+                feedbackDiv.appendChild(p);
+                // auto-scroll to bottom
+                feedbackDiv.scrollTop = feedbackDiv.scrollHeight;
+                // keep last 30 messages max (avoid overflow)
+                while (feedbackDiv.children.length > 30) {
+                    feedbackDiv.removeChild(feedbackDiv.firstChild);
+                }
+            }
+
+            // clear feedback log
+            function clearFeedback() {
+                feedbackDiv.innerHTML = '';
+                addFeedback('🧹 Feedback cleared. Ready for new Playwright tests.', false);
+            }
+
+            // ------------------------------------------------------------------
+            // 1. ALERT
+            function showAlert() {
+                // simple alert message
+                alert('🎭 Playwright Alert: This is a native alert dialog!\n\nYou can handle it using page.on("dialog").');
+                addFeedback('alert() displayed → dialog shown and dismissed by user (OK clicked)');
+                // additional console info for debugging
+                console.log('[Playwright Lab] Alert triggered and acknowledged.');
+            }
+
+            // 2. CONFIRM (returns boolean)
+            function showConfirm() {
+                const userConfirmed = confirm('❓ Confirm action: Do you want to proceed with the Playwright test simulation?');
+                if (userConfirmed) {
+                    addFeedback('confirm() → User clicked OK. Result: true');
+                } else {
+                    addFeedback('confirm() → User clicked Cancel. Result: false');
+                }
+                console.log(`[Confirm] User choice: ${userConfirmed}`);
+                // additional feedback for clarity
+            }
+
+            // 3. PROMPT (with custom message)
+            function showPrompt() {
+                const userInput = prompt('📝 Prompt dialog: Enter a test value for Playwright automation', 'Playwright rocks!');
+                if (userInput !== null) {
+                    addFeedback(`prompt() → User provided input: "${userInput}" (length: ${userInput.length})`);
+                    console.log(`[Prompt] value: ${userInput}`);
+                } else {
+                    addFeedback(`prompt() → User dismissed / canceled the prompt (no input).`);
+                    console.log('[Prompt] dismissed by user');
+                }
+            }
+
+            // 4. Async confirm: same but shows different default message (just for variety)
+            function showConfirmCustom() {
+                const result = confirm('⚡ Custom confirm: Do you want to simulate dialog acceptance? (For Playwright tests)');
+                if (result) {
+                    addFeedback('confirm (custom msg) → accepted ✅');
+                } else {
+                    addFeedback('confirm (custom msg) → dismissed ❌');
+                }
+            }
+
+            // 5. Prompt with prefilled value demonstration
+            function showPrefilledPrompt() {
+                const prefilledValue = 'Playwright';
+                const userResponse = prompt('🎯 Pre-filled prompt: Edit the text below', prefilledValue);
+                if (userResponse !== null) {
+                    addFeedback(`prefilled prompt → returned: "${userResponse}"`);
+                    if (userResponse === prefilledValue) {
+                        addFeedback(`(user kept default value: "${prefilledValue}")`);
+                    } else {
+                        addFeedback(`(user changed value to: "${userResponse}")`);
+                    }
+                } else {
+                    addFeedback(`prefilled prompt → canceled by user (no value saved)`);
+                }
+            }
+
+            // Additional safety: If someone spams, dialogs are standard but fine.
+            // Also add event listeners
+            alertBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showAlert();
+            });
+
+            confirmBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showConfirm();
+            });
+
+            promptBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showPrompt();
+            });
+
+            clearBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                clearFeedback();
+            });
+
+            asyncConfirmBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showConfirmCustom();
+            });
+
+            prefilledPromptBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showPrefilledPrompt();
+            });
+
+            // small helper: display an initial startup message
+            addFeedback('✨ Playwright lab ready — Dialogs are fully interceptable via page.on("dialog")', false);
+            addFeedback('💡 Tip: Try calling await page.click("#confirmBtn") and accept/dismiss in your script', false);
+
+            // Log keyboard / console hints
+            console.log('🎭 Playwright Practice Page Loaded | Alert / Confirm / Prompt ready for automation');
+
+            // Optional: provide global reference for debugging via console
+            window.__playwrightLab = {
+                triggerAlert: showAlert,
+                triggerConfirm: showConfirm,
+                triggerPrompt: showPrompt,
+                clearLog: clearFeedback
+            };
+        })();
+    </script>
+</body>
+
+</html>
