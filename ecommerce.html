@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>FullStock | E‑commerce + Admin (Stock & Vouchers)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, 'Inter', 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: #f4f6fa;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 1.75rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+      padding: 1.5rem;
+      border: 1px solid #eef2ff;
+    }
+
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    .btn-primary:hover { background: #2563eb; transform: translateY(-2px); }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+    }
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+    .btn-sm {
+      padding: 0.3rem 0.8rem;
+      font-size: 0.8rem;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: 1rem;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.8rem;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      background: white;
+      padding: 1rem 1.8rem;
+      border-radius: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #3b82f6, #a855f7);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.8rem;
+      margin-top: 1.5rem;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 1.2rem;
+      border: 1px solid #eef2ff;
+      transition: 0.2s;
+    }
+
+    .stock-badge {
+      font-size: 0.75rem;
+      background: #e2e8f0;
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      margin: 0.5rem 0;
+    }
+
+    .outofstock {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eef2ff;
+      padding: 1rem 0;
+      flex-wrap: wrap;
+    }
+
+    .alert {
+      padding: 0.7rem;
+      border-radius: 1rem;
+      margin: 0.8rem 0;
+    }
+    .alert-success { background: #dcfce7; color: #166534; }
+    .alert-error { background: #fee2e2; color: #b91c1c; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.8rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .badge {
+      background: #e2e8f0;
+      padding: 0.2rem 0.6rem;
+      border-radius: 30px;
+      font-size: 0.7rem;
+    }
+
+    @media (max-width: 700px) {
+      .navbar { flex-direction: column; gap: 1rem; }
+      .product-grid { gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+<div id="appRoot"></div>
+
+<script>
+  // ---------- STORAGE KEYS ----------
+  const STORAGE_USERS = "ecom_users_v2";
+  const STORAGE_PRODUCTS = "ecom_products_v2";
+  const STORAGE_ORDERS = "ecom_orders_v2";
+  const STORAGE_VOUCHERS = "ecom_vouchers_v2";
+  const CART_PREFIX = "cart_";
+
+  // ---------- INITIAL SEED DATA ----------
+  function initData() {
+    // Users: admin + demo customer
+    if (!localStorage.getItem(STORAGE_USERS)) {
+      const users = [
+        { id: "admin1", username: "admin", password: "admin", role: "admin" },
+        { id: "cust1", username: "alice", password: "alice", role: "customer" }
+      ];
+      localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
+    }
+    // Products with stock
+    if (!localStorage.getItem(STORAGE_PRODUCTS)) {
+      const products = [
+        { id: "p1", name: "Urban Backpack", price: 49.99, stock: 12, emoji: "🎒" },
+        { id: "p2", name: "Noise Cancelling Pods", price: 79.99, stock: 8, emoji: "🎧" },
+        { id: "p3", name: "Smartwatch Pro", price: 129.99, stock: 3, emoji: "⌚" },
+        { id: "p4", name: "Eco Water Bottle", price: 19.99, stock: 0, emoji: "💧" },
+        { id: "p5", name: "Classic Sneakers", price: 89.99, stock: 5, emoji: "👟" },
+        { id: "p6", name: "LED Desk Lamp", price: 34.99, stock: 2, emoji: "💡" }
+      ];
+      localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products));
+    }
+    // Orders
+    if (!localStorage.getItem(STORAGE_ORDERS)) localStorage.setItem(STORAGE_ORDERS, JSON.stringify([]));
+    // Vouchers (discounts)
+    if (!localStorage.getItem(STORAGE_VOUCHERS)) {
+      const vouchers = [
+        { code: "SAVE10", type: "percent", value: 10, active: true },
+        { code: "FLAT20", type: "fixed", value: 20, active: true }
+      ];
+      localStorage.setItem(STORAGE_VOUCHERS, JSON.stringify(vouchers));
+    }
+  }
+
+  // helpers
+  function getUsers() { return JSON.parse(localStorage.getItem(STORAGE_USERS)); }
+  function getProducts() { return JSON.parse(localStorage.getItem(STORAGE_PRODUCTS)); }
+  function saveProducts(products) { localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(products)); }
+  function getOrders() { return JSON.parse(localStorage.getItem(STORAGE_ORDERS)); }
+  function saveOrders(orders) { localStorage.setItem(STORAGE_ORDERS, JSON.stringify(orders)); }
+  function getVouchers() { return JSON.parse(localStorage.getItem(STORAGE_VOUCHERS)); }
+  function saveVouchers(vouchers) { localStorage.setItem(STORAGE_VOUCHERS, JSON.stringify(vouchers)); }
+
+  // cart per user
+  function getUserCart(userId) { const key = CART_PREFIX + userId; const stored = localStorage.getItem(key); return stored ? JSON.parse(stored) : []; }
+  function saveUserCart(userId, cart) { localStorage.setItem(CART_PREFIX + userId, JSON.stringify(cart)); }
+
+  let currentUser = null; // { id, username, role }
+
+  // --- helper: render UI based on role ---
+  function renderApp() {
+    const root = document.getElementById("appRoot");
+    if (!currentUser) {
+      root.innerHTML = renderAuthScreen();
+      attachAuthEvents();
+      return;
+    }
+    if (currentUser.role === "admin") {
+      root.innerHTML = renderAdminPanel();
+      attachAdminEvents();
+    } else {
+      root.innerHTML = renderCustomerArea();
+      attachCustomerEvents();
+      renderCustomerProducts();
+      updateCartBadge();
+      showCustomerView("shop");
+    }
+  }
+
+  // ==================== AUTH SCREEN ====================
+  function renderAuthScreen() {
+    return `
+      <div class="container">
+        <div class="card" style="max-width: 500px; margin: 2rem auto;">
+          <div style="display: flex; gap:1rem; margin-bottom:1rem;">
+            <button id="authLoginBtn" class="btn btn-primary" style="flex:1">Login</button>
+            <button id="authRegisterBtn" class="btn btn-outline" style="flex:1">Register</button>
+          </div>
+          <div id="loginPanel">
+            <h3>Login</h3>
+            <div id="loginMsg" class="alert" style="display:none;"></div>
+            <input type="text" id="loginUsername" placeholder="Username">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button id="doLogin" class="btn btn-primary" style="width:100%">Sign In</button>
+            <p style="margin-top:0.8rem; font-size:0.8rem;">Demo: admin/admin | alice/alice</p>
+          </div>
+          <div id="registerPanel" style="display:none;">
+            <h3>Register (Customer)</h3>
+            <div id="regMsg" class="alert" style="display:none;"></div>
+            <input type="text" id="regUsername" placeholder="Username">
+            <input type="password" id="regPassword" placeholder="Password">
+            <button id="doRegister" class="btn btn-primary" style="width:100%">Create Account</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function attachAuthEvents() {
+    document.getElementById("authLoginBtn").onclick = () => {
+      document.getElementById("loginPanel").style.display = "block";
+      document.getElementById("registerPanel").style.display = "none";
+    };
+    document.getElementById("authRegisterBtn").onclick = () => {
+      document.getElementById("loginPanel").style.display = "none";
+      document.getElementById("registerPanel").style.display = "block";
+    };
+    document.getElementById("doLogin").onclick = () => {
+      const username = document.getElementById("loginUsername").value;
+      const pwd = document.getElementById("loginPassword").value;
+      const users = getUsers();
+      const user = users.find(u => u.username === username && u.password === pwd);
+      if (user) {
+        currentUser = { id: user.id, username: user.username, role: user.role };
+        renderApp();
+      } else {
+        const msgDiv = document.getElementById("loginMsg");
+        msgDiv.style.display = "block";
+        msgDiv.innerText = "Invalid credentials";
+        msgDiv.className = "alert alert-error";
+      }
+    };
+    document.getElementById("doRegister").onclick = () => {
+      const username = document.getElementById("regUsername").value.trim();
+      const pwd = document.getElementById("regPassword").value.trim();
+      if (!username || !pwd) return;
+      const users = getUsers();
+      if (users.find(u => u.username === username)) {
+        const msgDiv = document.getElementById("regMsg");
+        msgDiv.style.display = "block";
+        msgDiv.innerText = "Username exists";
+        msgDiv.className = "alert alert-error";
+        return;
+      }
+      const newId = "c_" + Date.now();
+      users.push({ id: newId, username, password: pwd, role: "customer" });
+      localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
+      document.getElementById("regMsg").style.display = "block";
+      document.getElementById("regMsg").innerText = "Registered! Please login.";
+      document.getElementById("regMsg").className = "alert alert-success";
+      setTimeout(() => document.getElementById("authLoginBtn").click(), 1000);
+    };
+  }
+
+  // =============== CUSTOMER AREA ===============
+  function renderCustomerArea() {
+    return `
+      <div class="container">
+        <div class="navbar">
+          <div class="logo">🛍️ StockShop</div>
+          <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+            <span>👋 ${currentUser.username}</span>
+            <button id="custShopBtn" class="btn btn-outline btn-sm">Products</button>
+            <button id="custCartBtn" class="btn btn-outline btn-sm">Cart (<span id="cartCountBadge">0</span>)</button>
+            <button id="custOrdersBtn" class="btn btn-outline btn-sm">My Orders</button>
+            <button id="custLogoutBtn" class="btn btn-outline btn-sm">Logout</button>
+          </div>
+        </div>
+        <div id="customerShopView" class="view"></div>
+        <div id="customerCartView" class="view" style="display:none;"></div>
+        <div id="customerCheckoutView" class="view" style="display:none;"></div>
+        <div id="customerOrdersView" class="view" style="display:none;"></div>
+      </div>
+    `;
+  }
+
+  function renderCustomerProducts() {
+    const container = document.getElementById("customerShopView");
+    if (!container) return;
+    const products = getProducts();
+    let html = `<h2>🔥 All Products</h2><div class="product-grid">`;
+    products.forEach(p => {
+      const inStock = p.stock > 0;
+      html += `
+        <div class="product-card">
+          <div style="font-size:3rem;">${p.emoji}</div>
+          <div style="font-weight:bold;">${p.name}</div>
+          <div>$${p.price.toFixed(2)}</div>
+          <div class="stock-badge ${!inStock ? 'outofstock' : ''}">${inStock ? `✅ In stock (${p.stock})` : "❌ Out of stock"}</div>
+          ${inStock ? `<button class="btn btn-primary btn-sm addToCartBtn" data-id="${p.id}" style="margin-top:0.5rem; width:100%;">Add to Cart</button>` : `<button class="btn btn-outline btn-sm" disabled style="opacity:0.5; width:100%;">Out of Stock</button>`}
+        </div>
+      `;
+    });
+    html += `</div>`;
+    container.innerHTML = html;
+    document.querySelectorAll(".addToCartBtn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const pid = btn.getAttribute("data-id");
+        addToCart(pid);
+      });
+    });
+  }
+
+  function addToCart(productId) {
+    const products = getProducts();
+    const product = products.find(p => p.id === productId);
+    if (!product || product.stock <= 0) { showToast("Out of stock!", "error"); return; }
+    let cart = getUserCart(currentUser.id);
+    const existing = cart.find(i => i.productId === productId);
+    const currentQty = existing ? existing.quantity : 0;
+    if (currentQty + 1 > product.stock) { showToast(`Only ${product.stock} left in stock`, "error"); return; }
+    if (existing) existing.quantity += 1;
+    else cart.push({ productId: product.id, name: product.name, price: product.price, quantity: 1, emoji: product.emoji });
+    saveUserCart(currentUser.id, cart);
+    updateCartBadge();
+    showToast(`${product.name} added`, "success");
+    if (document.getElementById("customerCartView").style.display === "block") renderCartView();
+  }
+
+  function updateCartBadge() {
+    const cart = getUserCart(currentUser.id);
+    const total = cart.reduce((s, i) => s + i.quantity, 0);
+    const badge = document.getElementById("cartCountBadge");
+    if (badge) badge.innerText = total;
+  }
+
+  function renderCartView() {
+    const container = document.getElementById("customerCartView");
+    if (!container) return;
+    let cart = getUserCart(currentUser.id);
+    if (cart.length === 0) {
+      container.innerHTML = `<div class="card"><p>Cart is empty.</p><button id="continueShopBtn" class="btn btn-outline">Continue Shopping</button></div>`;
+      document.getElementById("continueShopBtn")?.addEventListener("click", () => showCustomerView("shop"));
+      return;
+    }
+    let total = 0;
+    let html = `<div class="card"><h3>Your Cart</h3>`;
+    cart.forEach((item, idx) => {
+      const itemTotal = item.price * item.quantity;
+      total += itemTotal;
+      html += `
+        <div class="cart-item">
+          <div><strong>${item.emoji} ${item.name}</strong><br>$${item.price.toFixed(2)}</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="qtyDec" data-pid="${item.productId}">-</button>
+            <span>${item.quantity}</span>
+            <button class="qtyInc" data-pid="${item.productId}">+</button>
+            <button class="btn-danger btn-sm removeItemBtn" data-pid="${item.productId}">Remove</button>
+          </div>
+        </div>
+      `;
+    });
+    html += `<div style="text-align:right; font-weight:800; font-size:1.3rem;">Total: $${total.toFixed(2)}</div>
+             <div style="margin-top:1rem; display:flex; gap:1rem; justify-content:flex-end;">
+               <button id="backToShopBtn" class="btn btn-outline">Back to Shop</button>
+               <button id="gotoCheckoutBtn" class="btn btn-primary">Proceed to Checkout</button>
+             </div></div>`;
+    container.innerHTML = html;
+    // attach events
+    document.querySelectorAll(".qtyInc").forEach(btn => {
+      btn.onclick = () => { updateCartItemQty(btn.getAttribute("data-pid"), 1); };
+    });
+    document.querySelectorAll(".qtyDec").forEach(btn => {
+      btn.onclick = () => { updateCartItemQty(btn.getAttribute("data-pid"), -1); };
+    });
+    document.querySelectorAll(".removeItemBtn").forEach(btn => {
+      btn.onclick = () => { removeCartItemCompletely(btn.getAttribute("data-pid")); };
+    });
+    document.getElementById("backToShopBtn")?.addEventListener("click", () => showCustomerView("shop"));
+    // FIX: proceed to checkout - switch view correctly
+    document.getElementById("gotoCheckoutBtn")?.addEventListener("click", () => showCustomerView("checkout"));
+  }
+
+  function updateCartItemQty(productId, delta) {
+    let cart = getUserCart(currentUser.id);
+    const idx = cart.findIndex(i => i.productId === productId);
+    if (idx === -1) return;
+    const product = getProducts().find(p => p.id === productId);
+    const newQty = cart[idx].quantity + delta;
+    if (newQty <= 0) {
+      cart.splice(idx, 1);
+    } else if (product && newQty > product.stock) {
+      showToast(`Cannot exceed stock (${product.stock})`, "error");
+      return;
+    } else {
+      cart[idx].quantity = newQty;
+    }
+    saveUserCart(currentUser.id, cart);
+    updateCartBadge();
+    renderCartView();
+  }
+  function removeCartItemCompletely(productId) {
+    let cart = getUserCart(currentUser.id);
+    cart = cart.filter(i => i.productId !== productId);
+    saveUserCart(currentUser.id, cart);
+    updateCartBadge();
+    renderCartView();
+  }
+
+  function showCheckoutForm() {
+    const container = document.getElementById("customerCheckoutView");
+    container.innerHTML = `
+      <div class="card">
+        <h2>🧾 Checkout</h2>
+        <div id="checkoutMsg" class="alert" style="display:none;"></div>
+        <input type="text" id="addrName" placeholder="Full name" required>
+        <input type="text" id="addrStreet" placeholder="Street address" required>
+        <input type="text" id="addrCity" placeholder="City" required>
+        <input type="text" id="addrZip" placeholder="Postal code" required>
+        
+        <h3>Voucher Code</h3>
+        <div style="display:flex; gap:0.5rem;">
+          <input type="text" id="voucherCode" placeholder="Enter code (SAVE10, FLAT20)">
+          <button id="applyVoucherBtn" class="btn btn-outline btn-sm">Apply</button>
+        </div>
+        <div id="voucherFeedback" style="font-size:0.8rem;"></div>
+
+        <h3>Payment Method</h3>
+        <select id="paymentMethod">
+          <option value="card">💳 Credit Card (dummy)</option>
+          <option value="cash">💵 Cash on Delivery</option>
+        </select>
+        <div id="cardFields">
+          <input type="text" id="cardNumber" placeholder="Card number (dummy)" value="4111 1111 1111 1111">
+          <input type="text" id="cardExpiry" placeholder="MM/YY" value="12/28">
+        </div>
+        <div id="orderSummary"></div>
+        <button id="placeOrderBtn" class="btn btn-primary" style="width:100%; margin-top:1rem;">Place Order</button>
+        <button id="backToCartCheckoutBtn" class="btn btn-outline" style="margin-top:0.5rem;">← Back to Cart</button>
+      </div>
+    `;
+    document.getElementById("backToCartCheckoutBtn").onclick = () => showCustomerView("cart");
+    document.getElementById("applyVoucherBtn").onclick = applyVoucher;
+    document.getElementById("paymentMethod").onchange = () => {
+      const isCard = document.getElementById("paymentMethod").value === "card";
+      document.getElementById("cardFields").style.display = isCard ? "block" : "none";
+    };
+    document.getElementById("paymentMethod").dispatchEvent(new Event("change"));
+    document.getElementById("placeOrderBtn").onclick = () => placeOrder();
+    updateOrderSummaryPreview();
+  }
+
+  let appliedDiscount = 0;
+  let appliedVoucherCode = null;
+
+  function applyVoucher() {
+    const code = document.getElementById("voucherCode").value.trim().toUpperCase();
+    const vouchers = getVouchers();
+    const voucher = vouchers.find(v => v.code === code && v.active);
+    if (!voucher) { document.getElementById("voucherFeedback").innerHTML = "<span style='color:red'>Invalid or inactive code</span>"; appliedDiscount = 0; appliedVoucherCode = null; updateOrderSummaryPreview(); return; }
+    const cart = getUserCart(currentUser.id);
+    let subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    let discount = 0;
+    if (voucher.type === "percent") discount = (subtotal * voucher.value) / 100;
+    else discount = voucher.value;
+    if (discount > subtotal) discount = subtotal;
+    appliedDiscount = discount;
+    appliedVoucherCode = code;
+    document.getElementById("voucherFeedback").innerHTML = `<span style='color:green'>✓ Code applied: ${voucher.code} - $${discount.toFixed(2)} off</span>`;
+    updateOrderSummaryPreview();
+  }
+
+  function updateOrderSummaryPreview() {
+    const cart = getUserCart(currentUser.id);
+    let subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    const total = subtotal - appliedDiscount;
+    const summaryDiv = document.getElementById("orderSummary");
+    if (summaryDiv) summaryDiv.innerHTML = `<div style="margin-top:1rem; background:#f8fafc; padding:0.8rem; border-radius:1rem;">
+      <div>Subtotal: $${subtotal.toFixed(2)}</div>
+      ${appliedDiscount > 0 ? `<div>Discount: -$${appliedDiscount.toFixed(2)}</div>` : ""}
+      <div><strong>Total: $${total.toFixed(2)}</strong></div>
+    </div>`;
+  }
+
+  async function placeOrder() {
+    const cart = getUserCart(currentUser.id);
+    if (cart.length === 0) { showToast("Cart empty", "error"); return; }
+    const fullName = document.getElementById("addrName").value.trim();
+    const street = document.getElementById("addrStreet").value.trim();
+    const city = document.getElementById("addrCity").value.trim();
+    const zip = document.getElementById("addrZip").value.trim();
+    if (!fullName || !street || !city || !zip) { showMessage("checkoutMsg", "Fill all address fields", "error"); return; }
+    const paymentMethod = document.getElementById("paymentMethod").value;
+    if (paymentMethod === "card") {
+      const card = document.getElementById("cardNumber").value.trim();
+      if (!card) { showMessage("checkoutMsg", "Card details required", "error"); return; }
+    }
+    // check stock again and update inventory
+    let products = getProducts();
+    let insufficient = false;
+    for (let item of cart) {
+      const prod = products.find(p => p.id === item.productId);
+      if (!prod || prod.stock < item.quantity) {
+        showToast(`Insufficient stock for ${item.name}`, "error");
+        insufficient = true;
+        break;
+      }
+    }
+    if (insufficient) return;
+    // update stock
+    for (let item of cart) {
+      const prod = products.find(p => p.id === item.productId);
+      prod.stock -= item.quantity;
+    }
+    saveProducts(products);
+    let subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    let finalTotal = subtotal - appliedDiscount;
+    const order = {
+      id: "ord_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6),
+      userId: currentUser.id,
+      customerName: fullName,
+      address: { fullName, street, city, zip },
+      paymentMethod,
+      items: cart.map(i => ({ name: i.name, quantity: i.quantity, price: i.price })),
+      subtotal,
+      discount: appliedDiscount,
+      total: finalTotal,
+      voucherCode: appliedVoucherCode,
+      status: "pending",
+      createdAt: new Date().toISOString()
+    };
+    const orders = getOrders();
+    orders.push(order);
+    saveOrders(orders);
+    // clear cart, reset voucher
+    saveUserCart(currentUser.id, []);
+    appliedDiscount = 0;
+    appliedVoucherCode = null;
+    updateCartBadge();
+    showMessage("checkoutMsg", `✅ Order placed! Order #${order.id.slice(-8)}`, "success");
+    setTimeout(() => showCustomerView("orders"), 2000);
+  }
+
+  function showMessage(elementId, msg, type) {
+    const el = document.getElementById(elementId);
+    if (el) { el.style.display = "block"; el.innerText = msg; el.className = `alert alert-${type}`; setTimeout(() => el.style.display = "none", 3000); }
+  }
+  function showToast(msg, type) {
+    const toast = document.createElement("div");
+    toast.innerText = msg;
+    toast.style.position = "fixed"; toast.style.bottom = "20px"; toast.style.left = "50%"; toast.style.transform = "translateX(-50%)";
+    toast.style.backgroundColor = type === "success" ? "#166534" : "#b91c1c"; toast.style.color = "white"; toast.style.padding = "0.5rem 1rem";
+    toast.style.borderRadius = "40px"; toast.style.zIndex = "9999"; document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+  }
+
+  function renderCustomerOrders() {
+    const container = document.getElementById("customerOrdersView");
+    const orders = getOrders().filter(o => o.userId === currentUser.id);
+    if (orders.length === 0) { container.innerHTML = `<div class="card">No orders yet.</div>`; return; }
+    let html = `<div class="card"><h3>📦 My Orders</h3>`;
+    orders.forEach(o => {
+      html += `<div style="border-bottom:1px solid #eef2ff; margin-bottom:1rem; padding-bottom:0.8rem;">
+        <div><strong>Order #${o.id.slice(-8)}</strong> <span class="badge">${o.status}</span></div>
+        <div>Date: ${new Date(o.createdAt).toLocaleString()}</div>
+        <div>Items: ${o.items.map(i => `${i.name} x${i.quantity}`).join(", ")}</div>
+        <div>Total paid: $${o.total.toFixed(2)}</div>
+        <div>Payment: ${o.paymentMethod === "card" ? "💳 Card" : "💵 COD"}</div>
+      </div>`;
+    });
+    html += `</div><button id="backFromOrdersBtn" class="btn btn-outline">Back to Shop</button>`;
+    container.innerHTML = html;
+    document.getElementById("backFromOrdersBtn")?.addEventListener("click", () => showCustomerView("shop"));
+  }
+
+  function showCustomerView(view) {
+    document.getElementById("customerShopView").style.display = view === "shop" ? "block" : "none";
+    document.getElementById("customerCartView").style.display = view === "cart" ? "block" : "none";
+    document.getElementById("customerCheckoutView").style.display = view === "checkout" ? "block" : "none";
+    document.getElementById("customerOrdersView").style.display = view === "orders" ? "block" : "none";
+    if (view === "shop") renderCustomerProducts();
+    if (view === "cart") renderCartView();
+    if (view === "checkout") showCheckoutForm();
+    if (view === "orders") renderCustomerOrders();
+  }
+
+  function attachCustomerEvents() {
+    document.getElementById("custShopBtn").onclick = () => showCustomerView("shop");
+    document.getElementById("custCartBtn").onclick = () => showCustomerView("cart");
+    document.getElementById("custOrdersBtn").onclick = () => showCustomerView("orders");
+    document.getElementById("custLogoutBtn").onclick = () => { currentUser = null; renderApp(); };
+  }
+
+  // =============== ADMIN PANEL (Stock, Vouchers, Orders) ===============
+  function renderAdminPanel() {
+    return `
+      <div class="container">
+        <div class="navbar">
+          <div class="logo">🔧 Admin Dashboard</div>
+          <button id="adminLogoutBtn" class="btn btn-outline btn-sm">Logout</button>
+        </div>
+        <div style="display: flex; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+          <button id="adminProductsTab" class="btn btn-primary">Manage Products / Stock</button>
+          <button id="adminVouchersTab" class="btn btn-outline">Vouchers</button>
+          <button id="adminOrdersTab" class="btn btn-outline">Orders</button>
+        </div>
+        <div id="adminProductsPanel" class="card"></div>
+        <div id="adminVouchersPanel" class="card" style="display:none;"></div>
+        <div id="adminOrdersPanel" class="card" style="display:none;"></div>
+      </div>
+    `;
+  }
+
+  function renderAdminProducts() {
+    const container = document.getElementById("adminProductsPanel");
+    let products = getProducts();
+    let html = `<h3>📦 Product Inventory (Update Stock / Delete)</h3>
+      <button id="addProductBtn" class="btn btn-primary btn-sm" style="margin-bottom:1rem;">+ Add New Product</button>
+      <table><thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead><tbody>`;
+    products.forEach(p => {
+      html += `<tr>
+        <td>${p.emoji} ${p.name}</td>
+        <td>$${p.price}</td>
+        <td><input type="number" id="stock_${p.id}" value="${p.stock}" style="width:80px;" min="0"></td>
+        <td><button class="updateStockBtn btn btn-sm btn-primary" data-id="${p.id}">Update Stock</button>
+        <button class="deleteProductBtn btn btn-sm btn-danger" data-id="${p.id}">Delete</button></td>
+       </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+    document.querySelectorAll(".updateStockBtn").forEach(btn => {
+      btn.onclick = () => {
+        const pid = btn.getAttribute("data-id");
+        const newStock = parseInt(document.getElementById(`stock_${pid}`).value);
+        if (isNaN(newStock)) return;
+        let prods = getProducts();
+        const idx = prods.findIndex(p => p.id === pid);
+        if (idx !== -1) { prods[idx].stock = newStock; saveProducts(prods); showToast("Stock updated", "success"); renderAdminProducts(); }
+      };
+    });
+    document.querySelectorAll(".deleteProductBtn").forEach(btn => {
+      btn.onclick = () => {
+        const pid = btn.getAttribute("data-id");
+        let prods = getProducts();
+        prods = prods.filter(p => p.id !== pid);
+        saveProducts(prods);
+        renderAdminProducts();
+        showToast("Product deleted", "success");
+      };
+    });
+    document.getElementById("addProductBtn").onclick = () => {
+      const name = prompt("Product name");
+      const price = parseFloat(prompt("Price"));
+      const stock = parseInt(prompt("Stock"));
+      if (!name || isNaN(price) || isNaN(stock)) return;
+      const products = getProducts();
+      const newId = "p" + Date.now();
+      products.push({ id: newId, name, price, stock, emoji: "📦" });
+      saveProducts(products);
+      renderAdminProducts();
+    };
+  }
+
+  function renderAdminVouchers() {
+    const container = document.getElementById("adminVouchersPanel");
+    let vouchers = getVouchers();
+    let html = `<h3>🎟️ Discount Vouchers</h3><button id="newVoucherBtn" class="btn btn-primary btn-sm">+ Add Voucher</button><table><thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Active</th><th>Action</th></tr></thead><tbody>`;
+    vouchers.forEach((v, idx) => {
+      html += `<tr>
+        <td>${v.code}</td>
+        <td>${v.type}</td>
+        <td>${v.value}</td>
+        <td><input type="checkbox" class="voucherActive" data-code="${v.code}" ${v.active ? "checked" : ""}></td>
+        <td><button class="deleteVoucherBtn btn btn-sm btn-danger" data-code="${v.code}">Delete</button></td>
+       </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+    document.querySelectorAll(".voucherActive").forEach(chk => {
+      chk.onchange = () => {
+        const code = chk.getAttribute("data-code");
+        let vouchers = getVouchers();
+        const v = vouchers.find(vc => vc.code === code);
+        if (v) v.active = chk.checked;
+        saveVouchers(vouchers);
+        showToast("Voucher updated", "success");
+      };
+    });
+    document.querySelectorAll(".deleteVoucherBtn").forEach(btn => {
+      btn.onclick = () => {
+        const code = btn.getAttribute("data-code");
+        let vouchers = getVouchers();
+        vouchers = vouchers.filter(v => v.code !== code);
+        saveVouchers(vouchers);
+        renderAdminVouchers();
+      };
+    });
+    document.getElementById("newVoucherBtn").onclick = () => {
+      const code = prompt("Voucher code (e.g., DISCOUNT20)").toUpperCase();
+      const type = prompt("Type: percent or fixed");
+      const value = parseFloat(prompt("Value (10 for 10% or 20 for $20)"));
+      if (!code || !type || isNaN(value)) return;
+      let vouchers = getVouchers();
+      if (vouchers.find(v => v.code === code)) { alert("Code exists"); return; }
+      vouchers.push({ code, type, value, active: true });
+      saveVouchers(vouchers);
+      renderAdminVouchers();
+    };
+  }
+
+  function renderAdminOrders() {
+    const container = document.getElementById("adminOrdersPanel");
+    let orders = getOrders();
+    if (orders.length === 0) { container.innerHTML = `<p>No orders yet.</p>`; return; }
+    let html = `<h3>📋 All Orders</h3><table><thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Action</th></tr></thead><tbody>`;
+    orders.forEach(order => {
+      html += `<tr>
+        <td>${order.id.slice(-8)}</td>
+        <td>${order.customerName}</td>
+        <td>${order.items.map(i => `${i.name} x${i.quantity}`).join(", ")}</td>
+        <td>$${order.total.toFixed(2)}</td>
+        <td><select class="orderStatusSelect" data-id="${order.id}"><option ${order.status==="pending"?"selected":""}>pending</option><option ${order.status==="processing"?"selected":""}>processing</option><option ${order.status==="shipped"?"selected":""}>shipped</option><option ${order.status==="delivered"?"selected":""}>delivered</option></select></td>
+        <td><button class="updateStatusBtn btn btn-sm btn-primary" data-id="${order.id}">Update</button></td>
+       </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+    document.querySelectorAll(".updateStatusBtn").forEach(btn => {
+      btn.onclick = () => {
+        const orderId = btn.getAttribute("data-id");
+        const select = document.querySelector(`.orderStatusSelect[data-id="${orderId}"]`);
+        const newStatus = select.value;
+        let orders = getOrders();
+        const ord = orders.find(o => o.id === orderId);
+        if (ord) ord.status = newStatus;
+        saveOrders(orders);
+        renderAdminOrders();
+        showToast("Status updated", "success");
+      };
+    });
+  }
+
+  function attachAdminEvents() {
+    document.getElementById("adminLogoutBtn").onclick = () => { currentUser = null; renderApp(); };
+    document.getElementById("adminProductsTab").onclick = () => {
+      document.getElementById("adminProductsPanel").style.display = "block";
+      document.getElementById("adminVouchersPanel").style.display = "none";
+      document.getElementById("adminOrdersPanel").style.display = "none";
+      renderAdminProducts();
+    };
+    document.getElementById("adminVouchersTab").onclick = () => {
+      document.getElementById("adminProductsPanel").style.display = "none";
+      document.getElementById("adminVouchersPanel").style.display = "block";
+      document.getElementById("adminOrdersPanel").style.display = "none";
+      renderAdminVouchers();
+    };
+    document.getElementById("adminOrdersTab").onclick = () => {
+      document.getElementById("adminProductsPanel").style.display = "none";
+      document.getElementById("adminVouchersPanel").style.display = "none";
+      document.getElementById("adminOrdersPanel").style.display = "block";
+      renderAdminOrders();
+    };
+    renderAdminProducts();
+  }
+
+  // bootstrap
+  initData();
+  renderApp();
+</script>
+</body>
+</html>
