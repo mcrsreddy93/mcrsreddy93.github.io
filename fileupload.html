@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>File Upload Gauntlet · Easy → Hard to Automate + Multi-File</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f0f4fc 0%, #e2e8f0 100%);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 2rem 1.5rem;
+            color: #0a1e2f;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* header & intro */
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-top: 0.75rem;
+        }
+
+        .badge {
+            background: #ffffffcc;
+            backdrop-filter: blur(4px);
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #1e3c72;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid rgba(60,80,120,0.2);
+        }
+
+        .sub {
+            color: #2c3e66;
+            max-width: 700px;
+            margin: 1rem auto 0;
+            background: rgba(255,255,240,0.5);
+            border-radius: 32px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            backdrop-filter: blur(2px);
+        }
+
+        /* card grid */
+        .upload-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(2px);
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.15), 0 0 0 1px rgba(156,180,215,0.3);
+            width: 100%;
+            max-width: 360px;
+            transition: transform 0.2s ease, box-shadow 0.2s;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 28px 40px -14px rgba(0,0,0,0.2);
+        }
+
+        .difficulty {
+            padding: 0.6rem 1.2rem;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e2edff;
+            color: #1e476b;
+        }
+
+        .difficulty.easy { background: #d9f0e1; color: #116b3c; border-left: 5px solid #2ecc71; }
+        .difficulty.medium { background: #fff0db; color: #b45f1b; border-left: 5px solid #f39c12; }
+        .difficulty.hard { background: #ffe6e5; color: #b91c1c; border-left: 5px solid #e74c3c; }
+        .difficulty.expert { background: #e9defa; color: #4a1d8c; border-left: 5px solid #9b59b6; }
+
+        .card-body {
+            padding: 1.5rem 1.2rem 1.8rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            color: #2c3e50;
+            margin-bottom: 1.2rem;
+            line-height: 1.4;
+            border-left: 2px solid #cbd5e1;
+            padding-left: 0.7rem;
+        }
+
+        .upload-area {
+            background: #f8fafd;
+            border-radius: 1.2rem;
+            padding: 0.8rem;
+            margin: 1rem 0;
+            border: 1px dashed #9bb6d0;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        input[type="file"] {
+            font-size: 0.8rem;
+            width: 100%;
+            padding: 8px;
+            border-radius: 40px;
+            border: 1px solid #bfd4ee;
+            background: white;
+        }
+
+        .file-list-preview {
+            background: #f1f5f9;
+            border-radius: 16px;
+            padding: 6px 10px;
+            margin-top: 8px;
+            font-size: 0.7rem;
+            text-align: left;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        button.upload-btn {
+            background: #1e4663;
+            border: none;
+            color: white;
+            padding: 10px 0;
+            font-weight: 600;
+            border-radius: 60px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            transition: 0.15s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        button.upload-btn:hover {
+            background: #0f2f48;
+            transform: scale(0.98);
+        }
+
+        .message {
+            margin-top: 12px;
+            font-size: 0.75rem;
+            border-radius: 28px;
+            padding: 6px 10px;
+            background: #f1f5f9;
+            color: #1e293b;
+            word-break: break-word;
+            font-family: monospace;
+        }
+
+        .msg-success {
+            background: #e0f2e9;
+            color: #0a5c3e;
+            border-left: 3px solid #2ecc71;
+        }
+
+        .msg-error {
+            background: #ffe6e5;
+            color: #aa2e2e;
+            border-left: 3px solid #e74c3c;
+        }
+
+        .info-hint {
+            font-size: 0.7rem;
+            color: #4a627a;
+            margin-top: 12px;
+            text-align: center;
+            border-top: 1px solid #e2edf2;
+            padding-top: 12px;
+        }
+
+        hr {
+            margin: 0.5rem 0;
+        }
+
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #36658f;
+            background: rgba(255,255,245,0.6);
+            border-radius: 2rem;
+            padding: 1rem;
+        }
+
+        @media (max-width: 780px) {
+            body { padding: 1rem; }
+            .card { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📤 Upload Resistance Gauntlet</h1>
+        <div class="badge-group">
+            <span class="badge">⚡ easy → hard to automate</span>
+            <span class="badge">🕵️ dynamic fields</span>
+            <span class="badge">🤖 anti-bot tricks</span>
+            <span class="badge">📚 multi-file support</span>
+        </div>
+        <div class="sub">
+            Each card simulates a different file upload behavior — from standard inputs to multi‑step confirmation, 
+            shadow‑root obfuscation, and drag & drop. <strong>New: dedicated multi-file upload card (basic design, multiple selection)</strong>
+        </div>
+    </div>
+
+    <div class="upload-grid">
+        <!-- NEW CARD: Multi-file upload (basic design, multiple attribute) -->
+        <div class="card">
+            <div class="difficulty easy">🟢 EASY · multiple files (basic)</div>
+            <div class="card-body">
+                <div class="card-title">📚 Multi Upload</div>
+                <div class="card-desc">Standard file input with `multiple` attribute. Select multiple files at once. Simple automation via setting `.files` property.</div>
+                <div class="upload-area">
+                    <input type="file" id="multiFileInput" multiple accept="image/*,text/plain,application/pdf,application/zip">
+                    <div id="multiFilePreview" class="file-list-preview" style="display: none;">📋 No files selected</div>
+                    <button class="upload-btn" id="multiBtn">📎 Upload all files</button>
+                </div>
+                <div id="multiMsg" class="message">Ready for multi-file selection (Ctrl+Click / Cmd+Click).</div>
+                <div class="info-hint">✨ automation: `element.files = FileList` or multiple selection. Simulate real multi-upload.</div>
+            </div>
+        </div>
+
+        <!-- LEVEL 1: Easy - Classic file input, no surprises -->
+        <div class="card">
+            <div class="difficulty easy">🟢 EASY · standard upload</div>
+            <div class="card-body">
+                <div class="card-title">📁 Basic Upload</div>
+                <div class="card-desc">Traditional file picker & submit. Automate with simple `input` selector & click.</div>
+                <div class="upload-area">
+                    <input type="file" id="easyFile" accept="image/*,text/plain,application/pdf">
+                    <button class="upload-btn" id="easyBtn">📎 Upload file</button>
+                </div>
+                <div id="easyMsg" class="message">Ready for upload.</div>
+                <div class="info-hint">✨ automation: `document.querySelector('#easyFile').files = ...`</div>
+            </div>
+        </div>
+
+        <!-- LEVEL 2: Medium - dynamic 'choose file' button + hidden input, needs human-like click -->
+        <div class="card">
+            <div class="difficulty medium">🟠 MEDIUM · hidden + styled trigger</div>
+            <div class="card-body">
+                <div class="card-title">🎭 Deceptive Trigger</div>
+                <div class="card-desc">Click on custom DIV triggers hidden file input. Automation must simulate click on specific element.</div>
+                <div class="upload-area" style="cursor: pointer;">
+                    <div id="customTrigger" style="background:#eef2ff; padding:12px; border-radius:60px; font-weight:500; margin-bottom:8px; border:1px solid #b9cef0;">
+                        📂 CLICK TO SELECT FILE (simulated button)
+                    </div>
+                    <input type="file" id="hiddenMediumInput" style="display:none;" accept=".txt,.json,.csv,image/*">
+                    <button class="upload-btn" id="mediumBtn">🚀 Submit medium file</button>
+                </div>
+                <div id="mediumMsg" class="message">Awaiting custom trigger selection.</div>
+                <div class="info-hint">🤖 trigger must click `#customTrigger`, then handle file dialog (or set `.files`). submit after.</div>
+            </div>
+        </div>
+
+        <!-- LEVEL 3: Hard - Multi-step: select file → extra confirmation checkbox + delayed accept -->
+        <div class="card">
+            <div class="difficulty hard">🔴 HARD · multi‑stage confirmation</div>
+            <div class="card-body">
+                <div class="card-title">⚠️ Double verification</div>
+                <div class="card-desc">After picking a file, you must check “I confirm upload” and wait 1.5 sec before enabling submit.</div>
+                <div class="upload-area">
+                    <input type="file" id="hardFileInput" accept=".pdf,.docx,.zip">
+                    <div style="margin: 12px 0 8px; display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="confirmCheckbox" disabled>
+                        <label for="confirmCheckbox" style="font-size:0.8rem;">✅ I confirm file is safe & ready</label>
+                    </div>
+                    <button class="upload-btn" id="hardBtn" disabled>⏳ Waiting confirmation...</button>
+                </div>
+                <div id="hardMsg" class="message">Pick a file to activate confirmation.</div>
+                <div class="info-hint">⏱️ Must enable checkbox (triggered after file selected), then check, then submit — simulates real user multi-step.</div>
+            </div>
+        </div>
+
+        <!-- LEVEL 4: Expert - Shadow DOM + dynamic ID and token challenge -->
+        <div class="card">
+            <div class="difficulty expert">🟣 EXPERT · Shadow DOM + anti‑automation token</div>
+            <div class="card-body">
+                <div class="card-title">🌑 Shadow Uploader</div>
+                <div class="card-desc">File input lives inside closed shadow root. Plus a rotating token that must be sent with upload (simulates CSRF/anti-bot).</div>
+                <div class="upload-area" id="shadowHost" style="min-height: 100px; background:#f3f0ff;">
+                    <!-- shadow root will be attached here -->
+                </div>
+                <button class="upload-btn" id="expertBtn">🧪 Upload via Shadow + token</button>
+                <div id="expertMsg" class="message">Shadow DOM initialized. Select file from internal component.</div>
+                <div class="info-hint">🤯 Automation must pierce shadowRoot, set file, extract rotating token value, and send.</div>
+            </div>
+        </div>
+
+        <!-- LEVEL 5: Expert+ extra: dynamic injection input appears after hover/delay? we add advanced: iframe style? no, but let's add extreme: hidden drag&drop + delayed visibility -->
+        <div class="card">
+            <div class="difficulty expert">🔮 INSANE · delayed + drag-only</div>
+            <div class="card-body">
+                <div class="card-title">🌀 Mirage Upload</div>
+                <div class="card-desc">File input only appears after 2 seconds of hovering "magic zone". Also only accepts upload via drag & drop (no traditional click).</div>
+                <div class="upload-area" id="mirageZone" style="background:#fff1e5; transition: all 0.1s;">
+                    <div id="hoverActivateZone" style="padding: 24px 10px; text-align:center; border-radius: 24px; background:#fbe9e3;">
+                        🧲 HOVER HERE → secret dropzone appears (2 sec delay)
+                    </div>
+                    <div id="dynamicDropContainer" style="display: none; margin-top: 15px; padding: 12px; border: 2px dashed #ff8c5a; border-radius: 20px;">
+                        ⬇️ Drag & drop file here (or use file selector? no, only d&d)
+                        <div id="fakeDropArea" style="min-height: 70px; margin-top: 8px; background:#fff1e2; border-radius: 20px; text-align: center; line-height: 70px;">📁 Drop target</div>
+                    </div>
+                </div>
+                <button class="upload-btn" id="mirageBtn" disabled>🔒 Wait for dropzone & file</button>
+                <div id="mirageMsg" class="message">Drag a file after hover reveals dropzone.</div>
+                <div class="info-hint">🐉 Automation must hover, wait DOM mutation, then dispatch drag/drop events.</div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        🧪 Each upload shows server-side simulation. No actual data leaves — purely frontend demo. Automate with Puppeteer, Playwright or Selenium.<br>
+        💡 <strong>Multi-file card</strong> supports selecting several files at once; preview list shows selected items.
+    </footer>
+</div>
+
+<script>
+    (function() {
+        // ---------- helper: show message with type ----------
+        function setMessage(elementId, text, isError = false) {
+            const msgDiv = document.getElementById(elementId);
+            if (msgDiv) {
+                msgDiv.innerText = text;
+                msgDiv.classList.remove('msg-success', 'msg-error');
+                msgDiv.classList.add(isError ? 'msg-error' : 'msg-success');
+                setTimeout(() => {
+                    if (document.getElementById(elementId) === msgDiv) {
+                        // keep but reset class? no, it's fine
+                    }
+                }, 4000);
+            }
+        }
+
+        // ---------- NEW: MULTI FILE UPLOAD (basic design) ----------
+        const multiInput = document.getElementById('multiFileInput');
+        const multiBtn = document.getElementById('multiBtn');
+        const multiPreview = document.getElementById('multiFilePreview');
+        
+        function updateMultiPreview() {
+            if (!multiInput.files || multiInput.files.length === 0) {
+                multiPreview.style.display = 'none';
+                multiPreview.innerHTML = '📋 No files selected';
+                return;
+            }
+            const fileList = Array.from(multiInput.files);
+            const fileNames = fileList.map(f => `📄 ${f.name} (${(f.size/1024).toFixed(1)} KB)`).join('<br>');
+            multiPreview.innerHTML = `<strong>${fileList.length} file(s) selected:</strong><br>${fileNames}`;
+            multiPreview.style.display = 'block';
+        }
+        
+        multiInput.addEventListener('change', updateMultiPreview);
+        
+        multiBtn.addEventListener('click', () => {
+            if (!multiInput.files || multiInput.files.length === 0) {
+                setMessage('multiMsg', '❌ No files selected. Choose one or more files using Ctrl/Cmd + click.', true);
+                return;
+            }
+            const files = Array.from(multiInput.files);
+            const summary = files.map(f => `${f.name} (${(f.size/1024).toFixed(1)}KB)`).join(', ');
+            setMessage('multiMsg', `✅ Multi-upload success! ${files.length} file(s): ${summary.substring(0, 120)}`, false);
+            // reset for next upload (optional)
+            multiInput.value = '';
+            updateMultiPreview();
+        });
+
+        // ---------- LEVEL 1: simple ----------
+        const easyInput = document.getElementById('easyFile');
+        const easyBtn = document.getElementById('easyBtn');
+        easyBtn.addEventListener('click', () => {
+            if (!easyInput.files || easyInput.files.length === 0) {
+                setMessage('easyMsg', '❌ No file selected. Pick a file first.', true);
+                return;
+            }
+            const file = easyInput.files[0];
+            setMessage('easyMsg', `✅ Uploaded: ${file.name} (${(file.size/1024).toFixed(1)} KB) | easy peasy`, false);
+        });
+
+        // ---------- LEVEL 2: hidden + custom trigger ----------
+        const hiddenInput = document.getElementById('hiddenMediumInput');
+        const customTrigger = document.getElementById('customTrigger');
+        const mediumBtn = document.getElementById('mediumBtn');
+        customTrigger.addEventListener('click', () => {
+            hiddenInput.click();  // open file dialog
+        });
+        let mediumSelectedFile = null;
+        hiddenInput.addEventListener('change', (e) => {
+            if (hiddenInput.files.length) {
+                mediumSelectedFile = hiddenInput.files[0];
+                setMessage('mediumMsg', `📎 selected: ${mediumSelectedFile.name} — click submit`, false);
+            } else {
+                mediumSelectedFile = null;
+            }
+        });
+        mediumBtn.addEventListener('click', () => {
+            if (!mediumSelectedFile) {
+                setMessage('mediumMsg', '⚠️ No file chosen — click the “CLICK TO SELECT” area first.', true);
+                return;
+            }
+            setMessage('mediumMsg', `📤 Medium upload success: ${mediumSelectedFile.name} (bypassed hidden input)`, false);
+            mediumSelectedFile = null;
+            hiddenInput.value = '';
+        });
+
+        // ---------- LEVEL 3: Hard: file selection -> enable checkbox -> enable button after check ----------
+        const hardFile = document.getElementById('hardFileInput');
+        const confirmCb = document.getElementById('confirmCheckbox');
+        const hardBtnElem = document.getElementById('hardBtn');
+        let hardSelectedFile = null;
+        hardFile.addEventListener('change', (e) => {
+            if (hardFile.files.length > 0) {
+                hardSelectedFile = hardFile.files[0];
+                setMessage('hardMsg', `📄 Picked: ${hardSelectedFile.name}. Now confirm checkbox.`, false);
+                confirmCb.disabled = false;
+                updateHardButtonState();
+            } else {
+                hardSelectedFile = null;
+                confirmCb.disabled = true;
+                confirmCb.checked = false;
+                hardBtnElem.disabled = true;
+                hardBtnElem.innerText = '⏳ Waiting file...';
+                setMessage('hardMsg', 'Pick a file to activate confirmation.', false);
+            }
+        });
+        function updateHardButtonState() {
+            if (hardSelectedFile && confirmCb.checked) {
+                hardBtnElem.disabled = false;
+                hardBtnElem.innerText = '✅ Confirm & Upload';
+            } else {
+                hardBtnElem.disabled = true;
+                hardBtnElem.innerText = hardSelectedFile ? '🔒 Check the box to enable' : '⏳ Waiting file...';
+            }
+        }
+        confirmCb.addEventListener('change', updateHardButtonState);
+        hardBtnElem.addEventListener('click', () => {
+            if (!hardSelectedFile || !confirmCb.checked) {
+                setMessage('hardMsg', 'Action required: select file & confirm checkbox.', true);
+                return;
+            }
+            setMessage('hardMsg', `🔥 Hard upload succeeded! "${hardSelectedFile.name}" with confirmation.`, false);
+            hardFile.value = '';
+            confirmCb.checked = false;
+            confirmCb.disabled = true;
+            hardSelectedFile = null;
+            hardBtnElem.disabled = true;
+            hardBtnElem.innerText = '⏳ Waiting file...';
+        });
+
+        // ---------- LEVEL 4: SHADOW DOM + rotating token ----------
+        const shadowHost = document.getElementById('shadowHost');
+        let shadowRoot = shadowHost.attachShadow({ mode: 'closed' });
+        const shadowHtml = `
+            <style>
+                div { font-family: monospace; padding: 8px; background:#f3ecff; border-radius: 20px; }
+                input { margin: 12px 0; width: 100%; }
+                .token-box { background:#e9d8fd; font-size:12px; padding:6px; border-radius: 12px; text-align:center; }
+            </style>
+            <div>
+                <div class="token-box" id="shadowTokenDisplay">🔐 anti-bot token: <span id="tokenValue">------</span></div>
+                <input type="file" id="shadowFileInput" accept="image/*,application/zip,text/plain">
+                <div style="font-size:11px; margin-top:5px;">file input inside closed shadow</div>
+            </div>
+        `;
+        shadowRoot.innerHTML = shadowHtml;
+        const shadowFile = shadowRoot.getElementById('shadowFileInput');
+        const tokenSpan = shadowRoot.getElementById('tokenValue');
+        let currentShadowToken = '';
+        function generateToken() {
+            return Math.random().toString(36).substring(2, 10).toUpperCase();
+        }
+        function updateShadowToken() {
+            currentShadowToken = generateToken();
+            if (tokenSpan) tokenSpan.innerText = currentShadowToken;
+        }
+        updateShadowToken();
+        shadowFile.addEventListener('change', () => {
+            updateShadowToken();
+            const hasFile = shadowFile.files.length > 0;
+            if (hasFile) {
+                setMessage('expertMsg', `🌑 Shadow file selected: ${shadowFile.files[0].name}. Token updated → must match on upload`, false);
+            }
+        });
+        // append token confirmation input inside shadow
+        const tokenInputDiv = document.createElement('div');
+        tokenInputDiv.innerHTML = `<label style="font-size:12px;">🔑 Token confirmation: <input id="expertTokenInput" placeholder="paste token from above" style="width:90%"></label>`;
+        shadowRoot.appendChild(tokenInputDiv);
+        const expertBtn = document.getElementById('expertBtn');
+        expertBtn.addEventListener('click', () => {
+            if (!shadowFile.files || shadowFile.files.length === 0) {
+                setMessage('expertMsg', '❌ No file selected inside shadow DOM. Use file picker inside special component.', true);
+                return;
+            }
+            const selectedFile = shadowFile.files[0];
+            const tokenInputField = shadowRoot.getElementById('expertTokenInput');
+            const userToken = tokenInputField ? tokenInputField.value.trim() : '';
+            if (userToken !== currentShadowToken) {
+                setMessage('expertMsg', `❌ Shadow upload failed: Token mismatch! Required token: ${currentShadowToken}`, true);
+                return;
+            }
+            setMessage('expertMsg', `🏆 Expert success! ${selectedFile.name} + valid token "${currentShadowToken}"`, false);
+            shadowFile.value = '';
+            if(tokenInputField) tokenInputField.value = '';
+            updateShadowToken();
+        });
+        const tokenHelper = document.createElement('div');
+        tokenHelper.style.fontSize = '10px';
+        tokenHelper.style.marginTop = '6px';
+        tokenHelper.style.color = '#4a3460';
+        tokenHelper.innerText = '⚡ Token rotates on file pick. Must match.';
+        shadowRoot.appendChild(tokenHelper);
+        
+        // ---------- LEVEL 5: Mirage: hover + delayed dropzone + only drag & drop ----------
+        const hoverZone = document.getElementById('hoverActivateZone');
+        const dynamicContainer = document.getElementById('dynamicDropContainer');
+        const mirageBtn = document.getElementById('mirageBtn');
+        let dropzoneVisible = false;
+        let droppedFile = null;
+        const fakeDropArea = document.getElementById('fakeDropArea');
+        let hoverTimeout = null;
+        function showDropzone() {
+            if (dynamicContainer) {
+                dynamicContainer.style.display = 'block';
+                dropzoneVisible = true;
+                mirageBtn.disabled = false;
+                mirageBtn.innerText = '🚀 Upload dropped file';
+                setMessage('mirageMsg', '✨ Dropzone active! Drag & drop file now.', false);
+            }
+        }
+        hoverZone.addEventListener('mouseenter', () => {
+            if (hoverTimeout) clearTimeout(hoverTimeout);
+            hoverTimeout = setTimeout(() => {
+                if (!dropzoneVisible) showDropzone();
+            }, 2000);
+        });
+        hoverZone.addEventListener('mouseleave', () => {
+            if (hoverTimeout) clearTimeout(hoverTimeout);
+        });
+        const dropTarget = fakeDropArea;
+        dropTarget.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropTarget.style.background = '#ffe0b5';
+        });
+        dropTarget.addEventListener('dragleave', () => {
+            dropTarget.style.background = '#fff1e2';
+        });
+        dropTarget.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropTarget.style.background = '#fff1e2';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                droppedFile = files[0];
+                setMessage('mirageMsg', `📁 Drag & drop captured: ${droppedFile.name}`, false);
+                mirageBtn.disabled = false;
+                mirageBtn.innerText = '✨ Upload file now';
+            } else {
+                setMessage('mirageMsg', 'No file detected in drop', true);
+            }
+        });
+        mirageBtn.addEventListener('click', () => {
+            if (!dropzoneVisible) {
+                setMessage('mirageMsg', 'Hover over magic zone to reveal drop target first!', true);
+                return;
+            }
+            if (!droppedFile) {
+                setMessage('mirageMsg', 'No file dropped yet. Drag a file into the drop zone.', true);
+                return;
+            }
+            setMessage('mirageMsg', `🌀 Mirage upload SUCCESS: ${droppedFile.name} via drag & drop!`, false);
+            droppedFile = null;
+            mirageBtn.disabled = true;
+            mirageBtn.innerText = '🔁 drop again to re-enable';
+            setTimeout(() => { if (dropzoneVisible) mirageBtn.disabled = false; }, 500);
+        });
+    })();
+</script>
+</body>
+</html>
