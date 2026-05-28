@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Playwright Practice: Tabs & Windows</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f5f7fc 0%, #e9eef4 100%);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* main practice card */
+        .practice-container {
+            max-width: 1400px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(2px);
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* header section */
+        .header {
+            background: #1e293b;
+            color: white;
+            padding: 1.2rem 2rem;
+            border-bottom: 3px solid #3b82f6;
+        }
+
+        .header h1 {
+            margin: 0 0 0.25rem 0;
+            font-weight: 600;
+            font-size: 1.8rem;
+            letter-spacing: -0.3px;
+        }
+
+        .header p {
+            margin: 0;
+            opacity: 0.85;
+            font-size: 0.95rem;
+        }
+
+        .badge-area {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: #0f172a;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-family: monospace;
+            border-left: 3px solid #3b82f6;
+        }
+
+        /* two column layout: controls left, logs right */
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+
+        .control-panel {
+            flex: 1.2;
+            min-width: 280px;
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            transition: 0.1s;
+        }
+
+        .log-panel {
+            flex: 2;
+            min-width: 320px;
+            background: #0f172a;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            color: #e2e8f0;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* action groups */
+        .action-group {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1.2rem;
+        }
+
+        .action-group h3 {
+            margin-top: 0;
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #0f172a;
+        }
+
+        .button-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 0.6rem 0;
+        }
+
+        button {
+            background: #f1f5f9;
+            border: none;
+            padding: 0.65rem 1.2rem;
+            border-radius: 60px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #cbd5e1;
+        }
+
+        button i.emoji {
+            font-style: normal;
+            font-weight: normal;
+        }
+
+        button.primary {
+            background: #2563eb;
+            border-color: #1d4ed8;
+            color: white;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+        }
+
+        button.primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        button.warning {
+            background: #f97316;
+            border-color: #ea580c;
+            color: white;
+        }
+
+        button.warning:hover {
+            background: #ea580c;
+        }
+
+        button.danger {
+            background: #ef4444;
+            border-color: #dc2626;
+            color: white;
+        }
+
+        button.danger:hover {
+            background: #dc2626;
+        }
+
+        button.secondary {
+            background: #334155;
+            border-color: #1e293b;
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            filter: brightness(0.97);
+        }
+
+        input {
+            padding: 0.6rem 1rem;
+            border-radius: 60px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.85rem;
+            width: 180px;
+            transition: 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        /* log area */
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 0.5rem;
+        }
+
+        .log-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .clear-log {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 0.75rem;
+            text-decoration: underline;
+            padding: 4px 8px;
+            box-shadow: none;
+        }
+
+        .clear-log:hover {
+            color: #facc15;
+            background: none;
+            transform: none;
+        }
+
+        .log-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            max-height: 380px;
+            font-family: 'JetBrains Mono', monospace, 'Fira Code';
+            font-size: 0.8rem;
+        }
+
+        .log-list li {
+            background: #1e293b;
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border-left: 4px solid #3b82f6;
+            word-break: break-word;
+            transition: 0.05s linear;
+        }
+
+        .log-list li.info {
+            border-left-color: #10b981;
+        }
+
+        .log-list li.warn {
+            border-left-color: #f97316;
+            background: #2d2a1e;
+        }
+
+        .log-list li.error {
+            border-left-color: #ef4444;
+            background: #2c1f1f;
+        }
+
+        .timestamp {
+            color: #94a3b8;
+            font-size: 0.7rem;
+            margin-right: 8px;
+        }
+
+        .badge-window {
+            background: #3b82f6;
+            color: white;
+            border-radius: 30px;
+            padding: 0px 8px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        /* footer */
+        .footer {
+            background: #eef2ff;
+            padding: 0.8rem 2rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #334155;
+            border-top: 1px solid #cbd5e1;
+        }
+
+        @media (max-width: 760px) {
+            .dashboard {
+                padding: 1rem;
+            }
+
+            .button-grid button {
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="practice-container">
+        <div class="header">
+            <h1>🎯 Playwright Practice Lab</h1>
+            <p>Multi‑Tab & Multi‑Window Sandbox — simulate real cross‑context automation</p>
+            <div class="badge-area">
+                <span class="badge">🪟 window.open()</span>
+                <span class="badge">🔗 target="_blank"</span>
+                <span class="badge">📋 cross-window messaging</span>
+                <span class="badge">🤖 ideal for Playwright tests</span>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <!-- LEFT: actions panel -->
+            <div class="control-panel">
+                <div class="action-group">
+                    <h3>📂 1. Create New Tab / Window</h3>
+                    <div class="button-grid">
+                        <button id="newBlankTabBtn" class="primary">➕ Blank Tab</button>
+                        <button id="newSameOriginTab" class="primary">🌐 Clone this page (tab)</button>
+                        <button id="newExternalTab" class="">🔗 Example Domain (new tab)</button>
+                    </div>
+                    <div class="flex-row">
+                        <input type="text" id="customUrlInput" placeholder="https://example.com"
+                            value="https://playwright.dev">
+                        <button id="openCustomUrlBtn">🚀 Open URL in new tab</button>
+                    </div>
+                </div>
+
+                <div class="action-group">
+                    <h3>🪟 2. Popup Windows (popup features)</h3>
+                    <div class="button-grid">
+                        <button id="smallPopupBtn" class="warning">📏 Small Popup (400x300)</button>
+                        <button id="popupWithFeaturesBtn" class="warning">🪟 Custom Popup (no toolbar)</button>
+                        <button id="relativePopupBtn">🖥️ Relative Popup (same origin)</button>
+                    </div>
+                    <div class="flex-row">
+                        <button id="openMultiplePopupsBtn" class="secondary">✨ Open 3 random popups</button>
+                    </div>
+                </div>
+
+                <div class="action-group">
+                    <h3>📡 3. Cross‑Tab Communication & Monitoring</h3>
+                    <div class="button-grid">
+                        <button id="detectChildWindowsBtn">🔍 List all open windows (console+log)</button>
+                        <button id="broadcastMessageBtn">💬 Broadcast "PING" to all tabs</button>
+                    </div>
+                    <p style="font-size: 0.75rem; color:#475569; margin: 8px 0 0 0;">
+                        ⚡ Opened windows/tabs will show log updates. Use Playwright's <strong>context.pages()</strong>
+                        to track.
+                    </p>
+                </div>
+
+                <div class="action-group">
+                    <h3>🧪 4. Playwright-friendly helpers</h3>
+                    <div class="button-grid">
+                        <button id="reportWindowIdBtn">📋 Show current window ID</button>
+                        <button id="simulateCloseSelfBtn" class="danger">❌ Close this tab/window</button>
+                    </div>
+                    <div class="flex-row">
+                        <button id="openAndFocusBtn" class="primary">🎯 Open new tab & focus (delayed)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: interactive log -->
+            <div class="log-panel">
+                <div class="log-header">
+                    <h3>📜 Activity Log (real-time events)</h3>
+                    <button id="clearLogBtn" class="clear-log">clear log</button>
+                </div>
+                <ul id="logList" class="log-list">
+                    <li class="info"><span class="timestamp">▶️ ready</span> ✅ Practice environment loaded. Use buttons
+                        to open tabs/windows.</li>
+                    <li class="info"><span class="timestamp">🧠 tip</span> All new windows/tabs will log their
+                        appearance & respond to broadcast messages.</li>
+                </ul>
+                <div
+                    style="margin-top: 12px; font-size:0.7rem; background:#00000030; border-radius: 24px; padding: 5px 10px;">
+                    💡 <strong>Playwright assertion examples:</strong>
+                    <code>await page.locator('#logList').getByText('New tab opened')</code> ,
+                    <code>expect(context.pages()).toHaveLength(3)</code>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            🧪 Designed for Playwright tests — tab/window lifecycle, cross-context messaging, and popup automation
+            practice.
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // -------- Helper: logging system (works across windows with broadcast)
+            const logContainer = document.getElementById('logList');
+            if (!logContainer) return;
+
+            // get a unique id for current window (to avoid confusion)
+            let windowId = `win_${Math.random().toString(36).substr(2, 6)}`;
+            // store in sessionStorage to allow child windows to know parent id? optional
+            try {
+                if (!sessionStorage.getItem('practice_window_id')) {
+                    sessionStorage.setItem('practice_window_id', windowId);
+                } else {
+                    windowId = sessionStorage.getItem('practice_window_id');
+                }
+            } catch (e) { /* ignore */ }
+
+            function addLog(message, type = 'info') {
+                if (!logContainer) return;
+                const li = document.createElement('li');
+                li.className = type;
+                const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const windowBadge = `<span class="badge-window" style="background:#334155;">${windowId.slice(-5)}</span>`;
+                li.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${windowBadge} ${message}`;
+                logContainer.appendChild(li);
+                li.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                // keep log length manageable
+                while (logContainer.children.length > 80) {
+                    logContainer.removeChild(logContainer.firstChild);
+                }
+            }
+
+            // override console sync if needed, but just manual logs
+            window.__practiceAddLog = addLog;
+            addLog(`🎯 Window ready (ID: ${windowId}) — use Playwright to interact with multiple contexts.`, 'info');
+
+            // -------- Cross-window event bus: broadcast via localStorage
+            const BROADCAST_KEY = 'practice_cross_tab_event';
+            function broadcastEvent(action, payload = {}) {
+                const eventData = {
+                    sourceId: windowId,
+                    action: action,
+                    payload: payload,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem(BROADCAST_KEY, JSON.stringify(eventData));
+                // trigger artificial event for same window? we also listen, but it's fine
+                setTimeout(() => localStorage.removeItem(BROADCAST_KEY), 100);
+            }
+
+            // listen for broadcast events from any tab/window that shares same origin
+            window.addEventListener('storage', (e) => {
+                if (e.key === BROADCAST_KEY && e.newValue) {
+                    try {
+                        const data = JSON.parse(e.newValue);
+                        if (data.sourceId === windowId) return; // ignore self
+                        if (data.action === 'ping') {
+                            addLog(`📡 Received PING from window ${data.sourceId} — responding with PONG (auto)`, 'info');
+                            // optionally respond with ack
+                            broadcastEvent('pong', { replyTo: data.sourceId, message: "Hello from " + windowId });
+                        }
+                        else if (data.action === 'pong') {
+                            addLog(`🏓 Received PONG from window ${data.sourceId}: ${data.payload.message || ''}`, 'info');
+                        }
+                        else if (data.action === 'custom_message') {
+                            addLog(`💬 Broadcast message from ${data.sourceId}: "${data.payload.text || 'no text'}"`, 'warn');
+                        } else if (data.action === 'list_windows_request') {
+                            // ignore to avoid flood
+                        } else {
+                            addLog(`📢 Broadcast [${data.action}] from ${data.sourceId}`, 'info');
+                        }
+                    } catch (err) { /* silent */ }
+                }
+            });
+
+            // expose broadcast to global for child windows to see if they have our script (since we share same origin)
+            window.sendCrossTabMessage = function (messageText) {
+                broadcastEvent('custom_message', { text: messageText });
+                addLog(`📤 Broadcasted message: "${messageText}" to all tabs`, 'info');
+            };
+
+            // helper: open url and return reference
+            function openNewTab(url, target = '_blank', features = '') {
+                let newWindow;
+                if (features) {
+                    newWindow = window.open(url, target, features);
+                } else {
+                    newWindow = window.open(url, target);
+                }
+                if (newWindow) {
+                    addLog(`🔗 Opened new tab/window → ${url} (target: ${target})`, 'info');
+                    // attempt to inject a small script to child if same origin? Not mandatory; but we can try to track child logs via broadcast + load detection
+                    // For cross-origin we can't modify DOM, but child will still have its own log area if it's same app (same origin).
+                    // Our open methods may also open relative/clone.
+                    return newWindow;
+                } else {
+                    addLog(`⚠️ Popup blocked! Check browser permissions.`, 'error');
+                    return null;
+                }
+            }
+
+            // clone current page (preserve state but with fresh log)
+            function cloneThisPageInTab() {
+                const currentUrl = window.location.href;
+                const newWin = openNewTab(currentUrl, '_blank');
+                if (newWin) {
+                    // after small delay we could add a cross-message
+                    setTimeout(() => {
+                        broadcastEvent('clone_opened', { from: windowId });
+                    }, 200);
+                }
+            }
+
+            // --- buttons wiring
+
+            // 1. blank tab
+            document.getElementById('newBlankTabBtn')?.addEventListener('click', () => {
+                openNewTab('about:blank', '_blank');
+            });
+            // clone page
+            document.getElementById('newSameOriginTab')?.addEventListener('click', () => {
+                cloneThisPageInTab();
+            });
+            // external example
+            document.getElementById('newExternalTab')?.addEventListener('click', () => {
+                openNewTab('https://example.com', '_blank');
+            });
+            // custom URL
+            const customUrlBtn = document.getElementById('openCustomUrlBtn');
+            const urlInput = document.getElementById('customUrlInput');
+            customUrlBtn?.addEventListener('click', () => {
+                let url = urlInput.value.trim();
+                if (!url) url = 'https://example.com';
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    url = 'https://' + url;
+                }
+                openNewTab(url, '_blank');
+            });
+
+            // popups
+            document.getElementById('smallPopupBtn')?.addEventListener('click', () => {
+                window.open('about:blank', 'smallPopup', 'width=400,height=300,left=200,top=200,resizable=yes');
+                addLog('🪟 Opened small popup (400x300) — Playwright can target via page event', 'info');
+            });
+            document.getElementById('popupWithFeaturesBtn')?.addEventListener('click', () => {
+                window.open('https://example.com', 'customPopup', 'width=600,height=500,toolbar=no,menubar=no,scrollbars=yes,location=no');
+                addLog('🪟 Opened custom popup without toolbar, ideal for testing popup handlers', 'info');
+            });
+            document.getElementById('relativePopupBtn')?.addEventListener('click', () => {
+                const popup = window.open(window.location.origin + window.location.pathname, 'relativePopup', 'width=800,height=600');
+                if (popup) addLog('🪟 Opened relative same-origin popup (replicates practice page)', 'info');
+            });
+            document.getElementById('openMultiplePopupsBtn')?.addEventListener('click', () => {
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        const win = window.open('about:blank', `multiPopup_${i}`, 'width=450,height=350');
+                        if (win) addLog(`✨ Multi-popup #${i + 1} opened`, 'info');
+                    }, i * 150);
+                }
+            });
+
+            // detect child windows : logs list of window references (but we can only get own references? but they are not stored globally)
+            document.getElementById('detectChildWindowsBtn')?.addEventListener('click', () => {
+                addLog(`🔎 Manual check: Use Playwright's context.pages() to get all pages. Current windowId = ${windowId}`, 'info');
+                addLog(`💡 To see open windows from JS: window.opener relationships are limited. Try broadcast: request listing?`, 'info');
+                // optional broadcast request
+                broadcastEvent('list_windows_request', {});
+            });
+
+            // broadcast message
+            document.getElementById('broadcastMessageBtn')?.addEventListener('click', () => {
+                broadcastEvent('ping', { message: 'PING from main practice page' });
+                addLog('📡 Broadcast PING to all windows/tabs (including this one)', 'info');
+            });
+
+            // report window id
+            document.getElementById('reportWindowIdBtn')?.addEventListener('click', () => {
+                addLog(`🆔 Current window unique identifier: ${windowId}`, 'info');
+                alert(`Window identifier: ${windowId}\nUse this to track in logs. Playwright can evaluate this value.`);
+            });
+
+            // close current tab/window (warning: may close the page)
+            document.getElementById('simulateCloseSelfBtn')?.addEventListener('click', () => {
+                if (confirm('⚠️ Close this tab/window? (Practice environment will close)')) {
+                    addLog('👋 Closing this window/tab...', 'warn');
+                    setTimeout(() => window.close(), 50);
+                }
+            });
+
+            // open and focus example: open new tab and then try to focus (works but browser restrictions)
+            document.getElementById('openAndFocusBtn')?.addEventListener('click', () => {
+                const newWin = openNewTab('about:blank', '_blank');
+                if (newWin) {
+                    addLog('🎯 New tab opened, attempting to bring focus (may require user interaction)', 'info');
+                    try {
+                        newWin.focus();
+                    } catch (e) { addLog('Focus blocked by browser policy', 'warn'); }
+                }
+            });
+
+            // clear log button
+            document.getElementById('clearLogBtn')?.addEventListener('click', () => {
+                while (logContainer.firstChild) logContainer.removeChild(logContainer.firstChild);
+                addLog('🧹 Log cleared by user', 'info');
+            });
+
+            // Additional: when page gets focus, we can note
+            window.addEventListener('focus', () => {
+                addLog(`👁️ Window (${windowId}) gained focus`, 'info');
+            });
+
+            // Notify that current page loaded and send hello via broadcast?
+            setTimeout(() => {
+                broadcastEvent('page_ready', { from: windowId });
+            }, 500);
+        })();
+    </script>
+</body>
+
+</html>
