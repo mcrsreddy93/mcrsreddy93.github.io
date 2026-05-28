@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🍪 Cookie Playground | Playwright Practice Lab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f7f3e9 0%, #f0ebdf 100%);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1.5rem;
+        }
+
+        /* main cookie card */
+        .cookie-lab {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(2px);
+            border-radius: 3rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        /* header with cookie vibe */
+        .hero {
+            background: #2e241f;
+            padding: 1.6rem 2rem;
+            color: #f9e2b7;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            border-bottom: 4px solid #e3b87c;
+        }
+
+        .hero h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hero h1 span {
+            font-size: 2.2rem;
+        }
+
+        .badge {
+            background: #e3b87c;
+            color: #2e241f;
+            padding: 0.4rem 1rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        /* two column layout: form + cookie jar */
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            padding: 2rem 2rem 2.2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 2rem;
+            padding: 1.6rem 1.8rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            min-width: 260px;
+            transition: transform 0.1s ease;
+            border: 1px solid #f3e5c9;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 5px solid #c49a6c;
+            padding-left: 0.9rem;
+            color: #3b2a22;
+        }
+
+        .form-group {
+            margin-bottom: 1.4rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: #4f3a2c;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 1.2rem;
+            border: 1.5px solid #e7dcc8;
+            background: #fefaf5;
+            font-size: 1rem;
+            transition: all 0.2s;
+            font-family: monospace;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #c49a6c;
+            box-shadow: 0 0 0 3px rgba(196, 154, 108, 0.2);
+            background: white;
+        }
+
+        .row-2cols {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .row-2cols input {
+            flex: 3;
+        }
+
+        .row-2cols select {
+            flex: 1;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        button {
+            background: #f0e2d0;
+            border: none;
+            padding: 0.7rem 1rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            color: #2e241f;
+            border: 1px solid #ddcdb5;
+        }
+
+        button.primary {
+            background: #c49a6c;
+            color: white;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button.primary:hover {
+            background: #b07d4e;
+            transform: scale(0.97);
+            cursor: pointer;
+        }
+
+        button.danger {
+            background: #ffe1de;
+            color: #b13e3e;
+            border-color: #f5c2bc;
+        }
+
+        button.danger:hover {
+            background: #fbc4be;
+        }
+
+        button:hover {
+            background: #e9dac8;
+            transform: translateY(-1px);
+        }
+
+        /* cookie jar table */
+        .cookie-jar {
+            background: #fffcf7;
+            border-radius: 1.6rem;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem 0.8rem 0.8rem 0.8rem;
+            background: #fef5ea;
+            color: #6e4f32;
+            font-weight: 700;
+            border-bottom: 2px solid #ebddcd;
+        }
+
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid #f0e4d6;
+            font-family: 'SF Mono', monospace;
+            word-break: break-word;
+        }
+
+        .cookie-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 2rem;
+            cursor: pointer;
+        }
+
+        .empty-message {
+            padding: 2rem;
+            text-align: center;
+            color: #bc9a78;
+            font-style: italic;
+        }
+
+        .status-area {
+            background: #e9dfd1;
+            margin: 0 2rem 1.8rem 2rem;
+            border-radius: 1.5rem;
+            padding: 0.8rem 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .status-message {
+            color: #2e5c3e;
+            font-weight: 500;
+            background: #dff0e6;
+            padding: 0.3rem 1rem;
+            border-radius: 30px;
+        }
+
+        .footer-note {
+            background: #f9f2e8;
+            padding: 0.8rem 2rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #8b694c;
+            border-top: 1px solid #eedfcb;
+            font-family: monospace;
+        }
+
+        @media (max-width: 720px) {
+            .dashboard {
+                flex-direction: column;
+            }
+
+            .hero h1 {
+                font-size: 1.4rem;
+            }
+
+            th,
+            td {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cookie-lab">
+        <div class="hero">
+            <h1>
+                <span>🍪</span> Cookie Playground
+                <span style="font-size: 1.2rem;">🧪</span>
+            </h1>
+            <div class="badge">⚡ Playwright automation ready</div>
+        </div>
+
+        <div class="dashboard">
+            <!-- left: cookie creator -->
+            <div class="card">
+                <h2>📝 Create / Update Cookie</h2>
+                <div class="form-group">
+                    <label>🍪 Cookie Name *</label>
+                    <input type="text" id="cookieName" placeholder="e.g., session_id, theme, user" value="test_cookie">
+                </div>
+                <div class="form-group">
+                    <label>📦 Cookie Value *</label>
+                    <input type="text" id="cookieValue" placeholder="value or token" value="hello_playwright">
+                </div>
+                <div class="row-2cols">
+                    <div style="flex:2">
+                        <label>⏱️ Expires (days)</label>
+                        <input type="number" id="expiryDays" value="1" step="0.5" placeholder="days from now">
+                    </div>
+                    <div>
+                        <label>🛡️ SameSite</label>
+                        <select id="sameSiteSelect">
+                            <option value="Lax">Lax (default)</option>
+                            <option value="Strict">Strict</option>
+                            <option value="None">None</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>🔒 Path (optional)</label>
+                    <input type="text" id="cookiePath" placeholder="/ (root)" value="/">
+                </div>
+                <div class="btn-group">
+                    <button id="setCookieBtn" class="primary">🍪 Set Cookie</button>
+                    <button id="deleteOneBtn" class="danger">🗑️ Delete selected cookie</button>
+                </div>
+                <div class="btn-group" style="margin-top: 0.6rem;">
+                    <button id="refreshCookiesBtn">🔄 Refresh Cookie Jar</button>
+                    <button id="deleteAllCookiesBtn" class="danger">⚠️ Delete ALL cookies</button>
+                </div>
+                <div
+                    style="margin-top: 1rem; font-size: 0.75rem; background:#faf3ea; border-radius: 2rem; padding: 0.5rem 0.8rem;">
+                    💡 <strong>Playwright tip:</strong> use <code>page.context().cookies()</code> /
+                    <code>page.context().addCookies()</code>
+                    or <code>await page.evaluate()</code> to interact. Cookies are visible below.
+                </div>
+            </div>
+
+            <!-- right: cookie jar display -->
+            <div class="card" style="overflow-x: auto;">
+                <h2>🏺 Cookie Jar <span style="font-size:0.9rem;">(document.cookie)</span></h2>
+                <div class="cookie-jar">
+                    <table id="cookieTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Value</th>
+                                <th>Path</th>
+                                <th>Expires (Date)</th>
+                                <th>SameSite</th>
+                                <th style="width: 70px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cookieTableBody">
+                            <tr>
+                                <td colspan="6" class="empty-message">🍪 No cookies yet — set one using the form!</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-area">
+            <span>🔍 <strong>Current state:</strong> all cookies shown are from <code
+                    style="background:#d9cebd; padding:2px 6px; border-radius:30px;">document.cookie</code></span>
+            <div id="liveStatus" class="status-message">✅ Ready — use form or Playwright</div>
+        </div>
+        <div class="footer-note">
+            🧪 Cookie domain = current host & path = "/" (or custom). Expiry: days from now → converted to UTC. Refresh
+            page keeps cookies persistent.
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            // ----- helper: read all cookies into array with rich attributes -----
+            // because document.cookie only gives name=value, we need to parse extra fields from actual cookie storage? 
+            // For real extended attributes (path, expires, samesite) we cannot retrieve them from document.cookie directly.
+            // But to practice with playwright and show that cookies are really set, we maintain a mirror storage using internal Map
+            // but actual cookies are stored by browser.  However we can display full attributes by storing them in a parallel store
+            // AND also rely on document.cookie for main name/value. To give realistic practice environment: we will store 
+            // full cookie details in localStorage (or a JS map) that reflects the real cookies? Actually better: when setting cookie,
+            // we set the real browser cookie (document.cookie) AND we store metadata in a 'cookieMeta' map for display purpose,
+            // but still the real cookie engine works. For delete, we delete real cookie and metadata.
+            // This approach shows accurate representation for Playwright because playwright reads real cookies via browser contexts.
+            // But for the UI to show path/expires/samesite we need to persist those extra fields. We'll store them in a separate 
+            // index in localStorage named 'cookiePlaygroundMeta' to keep between page reloads BUT matches real cookies validity.
+            // However expiry and samesite are not exposed via document.cookie, we will rely on metadata for the table.
+            // For simplicity & practice clarity: each time we set a cookie we store metadata; on page load we sync metadata
+            // against real cookie names (removing orphans). Good for playwright tests to verify both.
+
+            let cookieMetadata = new Map(); // key -> { value, path, expiresDate, sameSite, expiryTimestamp? }
+
+            // load metadata from localStorage
+            function loadMetadataFromStorage() {
+                const stored = localStorage.getItem('cookiePlaygroundMeta');
+                if (stored) {
+                    try {
+                        const parsed = JSON.parse(stored);
+                        cookieMetadata = new Map(Object.entries(parsed));
+                    } catch (e) { console.warn(e); }
+                }
+            }
+
+            function persistMetadata() {
+                const obj = Object.fromEntries(cookieMetadata);
+                localStorage.setItem('cookiePlaygroundMeta', JSON.stringify(obj));
+            }
+
+            // sync: remove metadata entries where real cookie no longer exists (document.cookie missing)
+            function syncMetadataWithRealCookies() {
+                const realCookies = document.cookie.split(';').reduce((acc, cookieStr) => {
+                    const [name] = cookieStr.trim().split('=');
+                    if (name) acc.add(name);
+                    return acc;
+                }, new Set());
+
+                let changed = false;
+                for (let [name, _] of cookieMetadata.entries()) {
+                    if (!realCookies.has(name)) {
+                        cookieMetadata.delete(name);
+                        changed = true;
+                    }
+                }
+                // Also add any real cookie that doesn't have metadata? we can create minimal metadata for those (e.g., path /)
+                for (let realName of realCookies) {
+                    if (!cookieMetadata.has(realName)) {
+                        // try to extract value from document.cookie
+                        const value = getCookieValue(realName);
+                        if (value !== null) {
+                            cookieMetadata.set(realName, {
+                                value: value,
+                                path: '/',
+                                expiresDate: null,
+                                sameSite: 'Lax',
+                                expiryDays: null
+                            });
+                            changed = true;
+                        }
+                    } else {
+                        // ensure value in metadata matches real cookie value (update if changed)
+                        const realVal = getCookieValue(realName);
+                        const meta = cookieMetadata.get(realName);
+                        if (meta && realVal !== null && meta.value !== realVal) {
+                            meta.value = realVal;
+                            cookieMetadata.set(realName, meta);
+                            changed = true;
+                        }
+                    }
+                }
+                if (changed) {
+                    persistMetadata();
+                    renderCookieTable();
+                }
+            }
+
+            function getCookieValue(name) {
+                const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+                if (match) return decodeURIComponent(match[2]);
+                return null;
+            }
+
+            // set real browser cookie using document.cookie with full attributes
+            function setBrowserCookie(name, value, path, expiresDate, sameSite) {
+                let cookieString = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; path=${path || '/'}`;
+                if (expiresDate) {
+                    cookieString += `; expires=${expiresDate.toUTCString()}`;
+                }
+                if (sameSite) {
+                    cookieString += `; SameSite=${sameSite}`;
+                }
+                // secure flag: if SameSite=None we must add Secure (modern browsers)
+                if (sameSite === 'None') {
+                    cookieString += `; Secure`;
+                }
+                document.cookie = cookieString;
+            }
+
+            // delete cookie (real and metadata)
+            function deleteCookieByName(name) {
+                // set expires in past
+                document.cookie = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+                // also delete for custom path if present in metadata? we loop known paths? metadata path may differ, but standard root delete works.
+                // If path stored different, we should also clear that variant:
+                const meta = cookieMetadata.get(name);
+                if (meta && meta.path && meta.path !== '/') {
+                    document.cookie = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=${meta.path}`;
+                } else {
+                    document.cookie = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+                }
+                cookieMetadata.delete(name);
+                persistMetadata();
+                renderCookieTable();
+                showStatus(`🗑️ Cookie "${name}" deleted.`, "#aa5e3b");
+            }
+
+            function deleteAllCookies() {
+                const allNames = [...cookieMetadata.keys()];
+                allNames.forEach(name => deleteCookieByName(name));
+                // extra cleanup for any remaining cookies
+                const allCookies = document.cookie.split(';');
+                for (let c of allCookies) {
+                    const eqIdx = c.indexOf('=');
+                    const name = eqIdx > -1 ? c.substr(0, eqIdx).trim() : c.trim();
+                    if (name) {
+                        document.cookie = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+                    }
+                }
+                cookieMetadata.clear();
+                persistMetadata();
+                renderCookieTable();
+                showStatus("🍪 All cookies have been nuked!", "#b3422e");
+            }
+
+            function setCookieFromForm() {
+                let name = document.getElementById('cookieName').value.trim();
+                let value = document.getElementById('cookieValue').value;
+                let expiryDays = parseFloat(document.getElementById('expiryDays').value);
+                let path = document.getElementById('cookiePath').value.trim() || '/';
+                let sameSite = document.getElementById('sameSiteSelect').value;
+
+                if (!name) {
+                    showStatus("❌ Cookie name cannot be empty", "#c25a3a");
+                    return;
+                }
+                if (!value) value = ""; // allow empty
+
+                let expiresDate = null;
+                if (!isNaN(expiryDays) && expiryDays > 0) {
+                    const date = new Date();
+                    date.setTime(date.getTime() + (expiryDays * 24 * 60 * 60 * 1000));
+                    expiresDate = date;
+                } else if (expiryDays === 0) {
+                    // session cookie: no expires
+                    expiresDate = null;
+                } else if (expiryDays < 0) {
+                    showStatus("Expiry days must be >= 0 (0 = session)", "#c25a3a");
+                    return;
+                }
+
+                // set real cookie
+                setBrowserCookie(name, value, path, expiresDate, sameSite);
+
+                // update metadata
+                cookieMetadata.set(name, {
+                    value: value,
+                    path: path,
+                    expiresDate: expiresDate ? expiresDate.toISOString() : null,
+                    sameSite: sameSite,
+                    expiryDays: expiryDays
+                });
+                persistMetadata();
+                renderCookieTable();
+                showStatus(`✅ Cookie "${name}" set successfully! (${sameSite}, path:${path})`, "#2e6b3e");
+
+                // optionally clear fields? but keep for next test
+            }
+
+            function renderCookieTable() {
+                const tbody = document.getElementById('cookieTableBody');
+                if (!tbody) return;
+
+                const entries = Array.from(cookieMetadata.entries());
+                if (entries.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="empty-message">🍪 No cookies — use form or playwright to add some 🧪</td></tr>';
+                    document.getElementById('liveStatus').innerHTML = '📭 No cookies in jar';
+                    return;
+                }
+
+                let html = '';
+                for (let [name, meta] of entries) {
+                    let expiresDisplay = meta.expiresDate ? new Date(meta.expiresDate).toLocaleString() : (meta.expiryDays === 0 ? 'Session' : 'Session');
+                    if (meta.expiresDate === null && meta.expiryDays !== 0) expiresDisplay = 'Session';
+                    html += `<tr>
+          <td><strong>${escapeHtml(name)}</strong></td>
+          <td style="max-width:180px; overflow-x:auto;">${escapeHtml(meta.value || '')}</td>
+          <td>${escapeHtml(meta.path || '/')}</td>
+          <td>${escapeHtml(expiresDisplay)}</td>
+          <td>${escapeHtml(meta.sameSite || 'Lax')}</td>
+          <td class="cookie-actions">
+            <button class="icon-btn delete-single" data-name="${escapeAttr(name)}" title="Delete cookie">🗑️</button>
+          </td>
+        </tr>`;
+                }
+                tbody.innerHTML = html;
+                document.getElementById('liveStatus').innerHTML = `🍪 ${entries.length} cookie(s) active. Use Playwright to inspect.`;
+
+                // attach delete events to each delete button
+                document.querySelectorAll('.delete-single').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const name = btn.getAttribute('data-name');
+                        if (name) deleteCookieByName(name);
+                    });
+                });
+            }
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                return str.replace(/[&<>]/g, function (m) {
+                    if (m === '&') return '&amp;';
+                    if (m === '<') return '&lt;';
+                    if (m === '>') return '&gt;';
+                    return m;
+                }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function (c) {
+                    return c;
+                });
+            }
+
+            function escapeAttr(str) {
+                return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
+
+            function showStatus(msg, colorHint = "#2e5c3e") {
+                const statusDiv = document.getElementById('liveStatus');
+                if (statusDiv) {
+                    statusDiv.innerHTML = msg;
+                    statusDiv.style.background = colorHint === "#2e5c3e" ? "#dff0e6" : "#ffe1d6";
+                    setTimeout(() => {
+                        if (statusDiv.innerHTML === msg) {
+                            statusDiv.style.background = "#dff0e6";
+                        }
+                    }, 2000);
+                }
+            }
+
+            function refreshAndSync() {
+                syncMetadataWithRealCookies();
+                renderCookieTable();
+                showStatus("🔄 Synchronized with browser cookies", "#4f6d5b");
+            }
+
+            // event handlers
+            document.getElementById('setCookieBtn').addEventListener('click', setCookieFromForm);
+            document.getElementById('deleteAllCookiesBtn').addEventListener('click', deleteAllCookies);
+            document.getElementById('refreshCookiesBtn').addEventListener('click', refreshAndSync);
+            document.getElementById('deleteOneBtn').addEventListener('click', () => {
+                const name = document.getElementById('cookieName').value.trim();
+                if (name && cookieMetadata.has(name)) {
+                    deleteCookieByName(name);
+                } else if (name) {
+                    showStatus(`⚠️ Cookie "${name}" not found in jar`, "#bd7a4a");
+                } else {
+                    showStatus("❌ Provide cookie name to delete", "#bd7a4a");
+                }
+            });
+
+            // initial load
+            loadMetadataFromStorage();
+            syncMetadataWithRealCookies();
+            renderCookieTable();
+
+            // optional: watch for external cookie changes (via devtools or playwright)
+            setInterval(() => {
+                syncMetadataWithRealCookies();
+            }, 1200);
+        })();
+    </script>
+</body>
+
+</html>
