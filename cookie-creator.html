@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🍪 Cookie Creator – all fields</title>
+    <style>
+        /* ── Reset & base ── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f4ede8;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+
+        .app {
+            max-width: 820px;
+            width: 100%;
+            background: rgba(255, 252, 248, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            padding: 40px 44px;
+            box-shadow: 0 20px 60px rgba(100, 70, 40, 0.10);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #3d2b1f;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        h1 span {
+            background: #c47a3a;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 2px 16px;
+            border-radius: 30px;
+            margin-left: 6px;
+        }
+
+        .sub {
+            color: #8a7a6a;
+            font-size: 15px;
+            margin-bottom: 28px;
+            border-bottom: 2px dashed rgba(180, 140, 110, 0.2);
+            padding-bottom: 16px;
+        }
+
+        /* ── Form ── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .app {
+                padding: 24px 18px;
+                border-radius: 32px;
+            }
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        .field label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #4a3222;
+            letter-spacing: 0.3px;
+        }
+
+        .field label .required {
+            color: #c47a3a;
+            margin-left: 2px;
+        }
+
+        .field input,
+        .field select {
+            padding: 10px 14px;
+            border-radius: 30px;
+            border: 1.5px solid rgba(180, 140, 110, 0.2);
+            background: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            color: #3d2b1f;
+            outline: none;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: #c47a3a;
+            box-shadow: 0 0 0 4px rgba(196, 122, 58, 0.08);
+            background: #fff;
+        }
+
+        .field input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #c47a3a;
+            cursor: pointer;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-group label {
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #9a8a7a;
+            margin-top: 2px;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            border-radius: 40px;
+            border: none;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #c47a3a;
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(196, 122, 58, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: #a8652e;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.96);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid rgba(180, 140, 110, 0.25);
+            color: #4a3222;
+        }
+
+        .btn-outline:hover {
+            background: rgba(180, 140, 110, 0.08);
+        }
+
+        .btn-danger {
+            background: #d95c4a20;
+            color: #b15341;
+            border: 1px solid #d95c4a30;
+        }
+
+        .btn-danger:hover {
+            background: #d95c4a30;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+        }
+
+        /* ── Cookie list ── */
+        .cookie-section {
+            border-top: 2px dashed rgba(180, 140, 110, 0.2);
+            padding-top: 24px;
+            margin-top: 8px;
+        }
+
+        .cookie-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .cookie-header h2 {
+            font-size: 20px;
+            color: #3d2b1f;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cookie-header .badge {
+            background: #c47a3a20;
+            padding: 2px 14px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #c47a3a;
+        }
+
+        .cookie-list {
+            max-height: 260px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .cookie-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .cookie-list::-webkit-scrollbar-track {
+            background: rgba(180, 140, 110, 0.08);
+            border-radius: 10px;
+        }
+
+        .cookie-list::-webkit-scrollbar-thumb {
+            background: rgba(180, 140, 110, 0.25);
+            border-radius: 10px;
+        }
+
+        .cookie-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 18px;
+            margin-bottom: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 14px;
+            animation: slideIn 0.25s ease;
+        }
+
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cookie-item .info {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            overflow: hidden;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .cookie-item .info .name {
+            font-weight: 600;
+            color: #4a3222;
+            word-break: break-all;
+        }
+
+        .cookie-item .info .value {
+            color: #7a6a5a;
+            word-break: break-all;
+            font-size: 13px;
+        }
+
+        .cookie-item .info .meta {
+            font-size: 11px;
+            color: #b09888;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .cookie-item .del {
+            background: none;
+            border: none;
+            color: #b09888;
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.15s;
+            padding: 4px 8px;
+            border-radius: 30px;
+        }
+
+        .cookie-item .del:hover {
+            background: #d95c4a20;
+            color: #b15341;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #b09888;
+            padding: 28px 10px;
+            font-size: 15px;
+        }
+
+        .empty-state .big {
+            font-size: 44px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 999;
+            max-width: 360px;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: #3d2b1fe0;
+            backdrop-filter: blur(12px);
+            color: #f5ede8;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            animation: slideUp 0.4s ease;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.out {
+            animation: slideDown 0.35s ease forwards;
+        }
+
+        @keyframes slideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes slideDown {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app">
+        <h1>🍪 Cookie Creator <span>all fields</span></h1>
+        <p class="sub">Set every attribute of a browser cookie – name, value, expiry, path, domain, Secure, SameSite.
+        </p>
+
+        <!-- Form -->
+        <form id="cookieForm" autocomplete="off">
+            <div class="form-grid">
+                <!-- Name -->
+                <div class="field">
+                    <label>Cookie Name <span class="required">*</span></label>
+                    <input type="text" id="cookieName" placeholder="e.g. theme" required />
+                </div>
+                <!-- Value -->
+                <div class="field">
+                    <label>Cookie Value <span class="required">*</span></label>
+                    <input type="text" id="cookieValue" placeholder="e.g. dark" required />
+                </div>
+
+                <!-- Expiration -->
+                <div class="field">
+                    <label>Expiration (max‑age in seconds) <span class="required">*</span></label>
+                    <input type="number" id="cookieMaxAge" placeholder="86400 (1 day)" value="86400" min="0" required />
+                    <div class="help-text">Set to 0 for session cookie (deleted on browser close).</div>
+                </div>
+
+                <!-- Path -->
+                <div class="field">
+                    <label>Path</label>
+                    <input type="text" id="cookiePath" placeholder="/" value="/" />
+                    <div class="help-text">Default: current path, but usually '/' is used.</div>
+                </div>
+
+                <!-- Domain -->
+                <div class="field">
+                    <label>Domain</label>
+                    <input type="text" id="cookieDomain" placeholder="example.com" />
+                    <div class="help-text">Leave blank for current host. Can set subdomain if applicable.</div>
+                </div>
+
+                <!-- SameSite -->
+                <div class="field">
+                    <label>SameSite</label>
+                    <select id="cookieSameSite">
+                        <option value="Lax">Lax (default)</option>
+                        <option value="Strict">Strict</option>
+                        <option value="None">None</option>
+                    </select>
+                    <div class="help-text">'None' requires Secure flag.</div>
+                </div>
+
+                <!-- Secure + HttpOnly (info only) -->
+                <div class="field" style="grid-column: 1 / -1;">
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" id="cookieSecure" />
+                            🔒 Secure (only sent over HTTPS)
+                        </label>
+                        <label style="opacity:0.6; cursor:default;">
+                            <input type="checkbox" disabled checked />
+                            HttpOnly (cannot be set via JS – server‑side only)
+                        </label>
+                        <span style="font-size:12px; color:#9a8a7a;">(HttpOnly is not configurable from
+                            client‑side)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn btn-primary">➕ Create Cookie</button>
+                <button type="reset" class="btn btn-outline">↺ Clear Form</button>
+            </div>
+        </form>
+
+        <!-- Cookie list -->
+        <div class="cookie-section">
+            <div class="cookie-header">
+                <h2>📋 All Cookies <span class="badge" id="cookieCountBadge">0</span></h2>
+                <button class="btn btn-danger" id="clearAllBtn" style="padding:6px 18px; font-size:13px;">🗑 Clear
+                    All</button>
+            </div>
+            <div class="cookie-list" id="cookieListContainer">
+                <div class="empty-state">
+                    <span class="big">🏺</span>
+                    No cookies set yet.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            // ── DOM refs ──
+            const form = document.getElementById('cookieForm');
+            const nameInput = document.getElementById('cookieName');
+            const valueInput = document.getElementById('cookieValue');
+            const maxAgeInput = document.getElementById('cookieMaxAge');
+            const pathInput = document.getElementById('cookiePath');
+            const domainInput = document.getElementById('cookieDomain');
+            const sameSiteSelect = document.getElementById('cookieSameSite');
+            const secureCheck = document.getElementById('cookieSecure');
+            const cookieList = document.getElementById('cookieListContainer');
+            const cookieCountBadge = document.getElementById('cookieCountBadge');
+            const clearAllBtn = document.getElementById('clearAllBtn');
+            const toastContainer = document.getElementById('toastContainer');
+
+            // ── Helpers ──
+            function getCookie(name) {
+                const match = document.cookie.match(new RegExp('(^| )' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '=([^;]+)'));
+                return match ? decodeURIComponent(match[2]) : null;
+            }
+
+            function setCookie(name, value, options = {}) {
+                let cookie = name + '=' + encodeURIComponent(value);
+
+                if (options.maxAge !== undefined && options.maxAge !== null && options.maxAge >= 0) {
+                    cookie += '; max-age=' + options.maxAge;
+                }
+                if (options.path) {
+                    cookie += '; path=' + options.path;
+                }
+                if (options.domain) {
+                    cookie += '; domain=' + options.domain;
+                }
+                if (options.secure) {
+                    cookie += '; secure';
+                }
+                if (options.sameSite) {
+                    cookie += '; samesite=' + options.sameSite;
+                }
+
+                document.cookie = cookie;
+            }
+
+            function deleteCookie(name, path = '/', domain = '') {
+                let cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=' + path;
+                if (domain) {
+                    cookie += '; domain=' + domain;
+                }
+                document.cookie = cookie;
+            }
+
+            function getAllCookies() {
+                const cookies = {};
+                if (!document.cookie) return cookies;
+                document.cookie.split(';').forEach(pair => {
+                    const trimmed = pair.trim();
+                    if (!trimmed) return;
+                    const eq = trimmed.indexOf('=');
+                    if (eq === -1) return;
+                    const name = trimmed.substring(0, eq);
+                    const value = trimmed.substring(eq + 1);
+                    cookies[name] = decodeURIComponent(value);
+                });
+                return cookies;
+            }
+
+            function clearAllCookies() {
+                const cookies = getAllCookies();
+                Object.keys(cookies).forEach(name => {
+                    // delete with empty path/domain; but we can try with path '/' and also without domain
+                    deleteCookie(name, '/');
+                    // also try with current path if different
+                    deleteCookie(name);
+                });
+            }
+
+            // ── Toast ──
+            function showToast(message, icon = '🍪') {
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.innerHTML = `<span>${icon}</span> ${message}`;
+                toastContainer.appendChild(toast);
+                setTimeout(() => {
+                    toast.classList.add('out');
+                    setTimeout(() => toast.remove(), 400);
+                }, 2800);
+            }
+
+            // ── Render cookie list ──
+            function renderCookies() {
+                const all = getAllCookies();
+                const entries = Object.entries(all);
+
+                cookieCountBadge.textContent = entries.length;
+
+                if (entries.length === 0) {
+                    cookieList.innerHTML = `
+                    <div class="empty-state">
+                        <span class="big">🏺</span>
+                        No cookies set.
+                    </div>
+                `;
+                    return;
+                }
+
+                let html = '';
+                entries.forEach(([name, value]) => {
+                    const displayVal = value.length > 50 ? value.slice(0, 50) + '…' : value;
+                    // We can't retrieve attributes like path/secure from client side, so we only show name and value.
+                    html += `
+                    <div class="cookie-item">
+                        <div class="info">
+                            <span class="name">${escapeHtml(name)}</span>
+                            <span class="value">${escapeHtml(displayVal)}</span>
+                        </div>
+                        <button class="del" data-name="${escapeHtml(name)}" title="Delete cookie">✕</button>
+                    </div>
+                `;
+                });
+                cookieList.innerHTML = html;
+
+                // Delete buttons
+                cookieList.querySelectorAll('.del').forEach(btn => {
+                    btn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        const name = this.dataset.name;
+                        if (confirm(`Delete cookie "${name}"?`)) {
+                            // Try to delete with path '/' and also without
+                            deleteCookie(name, '/');
+                            deleteCookie(name); // current path
+                            showToast(`Deleted “${name}”`, '🗑');
+                            renderCookies();
+                        }
+                    });
+                });
+            }
+
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            // ── Form submit ──
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const name = nameInput.value.trim();
+                const value = valueInput.value.trim();
+                const maxAge = parseInt(maxAgeInput.value, 10);
+                const path = pathInput.value.trim() || '/';
+                const domain = domainInput.value.trim() || undefined;
+                const sameSite = sameSiteSelect.value;
+                const secure = secureCheck.checked;
+
+                // Validate
+                if (!name) {
+                    showToast('Please enter a cookie name.', '✏️');
+                    return;
+                }
+                if (!value) {
+                    showToast('Please enter a cookie value.', '✏️');
+                    return;
+                }
+                if (isNaN(maxAge) || maxAge < 0) {
+                    showToast('Max-age must be a non-negative number.', '⚠️');
+                    return;
+                }
+
+                // Build options
+                const options = {
+                    maxAge: maxAge,
+                    path: path,
+                    sameSite: sameSite,
+                    secure: secure,
+                };
+                if (domain) options.domain = domain;
+
+                // Set cookie
+                setCookie(name, value, options);
+                showToast(`Cookie “${name}” created!`, '✅');
+                renderCookies();
+
+                // Optionally reset form fields (keep name/value for quick edits?)
+                // We'll keep them, but we can clear value only?
+                // User can manually clear.
+                // We'll leave them as is.
+            });
+
+            // ── Clear all ──
+            clearAllBtn.addEventListener('click', function () {
+                if (!confirm('Delete ALL cookies?')) return;
+                clearAllCookies();
+                showToast('All cookies cleared.', '🗑');
+                renderCookies();
+            });
+
+            // ── Initial render ──
+            renderCookies();
+
+            // ── Auto-refresh every 2 seconds ──
+            setInterval(renderCookies, 2000);
+
+            // ── Initial toast ──
+            setTimeout(() => {
+                showToast('🍪 Fill in the form and create your cookie!', '👋');
+            }, 500);
+        })();
+    </script>
+
+</body>
+
+</html>
